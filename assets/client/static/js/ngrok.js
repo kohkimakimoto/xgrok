@@ -1,4 +1,4 @@
-var ngrok = angular.module("ngrok", ["ngSanitize"]);
+var xgrok = angular.module("xgrok", ["ngSanitize"]);
 
 var hexRepr = function(bytes) {
     var buf = [];
@@ -40,7 +40,7 @@ var hexRepr = function(bytes) {
     return buf.join("");
 }
 
-ngrok.factory("txnSvc", function() {
+xgrok.factory("txnSvc", function() {
     var processBody = function(body, binary) {
         body.binary = binary;
         body.isForm = body.ContentType == "application/x-www-form-urlencoded";
@@ -185,7 +185,7 @@ ngrok.factory("txnSvc", function() {
     };
 });
 
-ngrok.directive({
+xgrok.directive({
     "keyval": function() {
         return {
             scope: {
@@ -301,7 +301,7 @@ ngrok.directive({
     }
 });
 
-ngrok.controller({
+xgrok.controller({
     "HttpTxns": function($scope, txnSvc) {
         $scope.tunnels = window.data.UiState.Tunnels;
         $scope.txns = txnSvc.all();

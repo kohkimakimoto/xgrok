@@ -1,52 +1,32 @@
-.PHONY: default server client deps fmt clean all release-all assets client-assets server-assets contributors
-export GOPATH:=$(shell pwd)
+.PHONY: default dev dist packaging packaging_destroy fmt test testv deps deps_update
 
-BUILDTAGS=debug
-default: all
+default: dev
 
-deps: assets
-	go get -tags '$(BUILDTAGS)' -d -v ngrok/...
+dev:
+	@bash -c $(CURDIR)/_build/dev.sh
 
-server: deps
-	go install -tags '$(BUILDTAGS)' ngrok/main/ngrokd
+dist:
+	@bash -c $(CURDIR)/_build/dist.sh
+
+packaging:
+	@bash -c $(CURDIR)/_build/packaging.sh
+
+packaging_destroy:
+	@sh -c "cd $(CURDIR)/_build/packaging/rpm && vagrant destroy -f"
 
 fmt:
-	go fmt ngrok/...
+	go fmt $$(go list ./... | grep -v vendor)
 
-client: deps
-	go install -tags '$(BUILDTAGS)' ngrok/main/ngrok
+deps:
+	gom install
 
-assets: client-assets server-assets
+deps_update:
+	rm Gomfile.lock; rm -rf vendor; gom install && gom lock
 
-bin/go-bindata:
-	GOOS="" GOARCH="" go get github.com/jteeuwen/go-bindata/go-bindata
-
-client-assets: bin/go-bindata
-	bin/go-bindata -nomemcopy -pkg=assets -tags=$(BUILDTAGS) \
-		-debug=$(if $(findstring debug,$(BUILDTAGS)),true,false) \
-		-o=src/ngrok/client/assets/assets_$(BUILDTAGS).go \
-		assets/client/...
-
-server-assets: bin/go-bindata
-	bin/go-bindata -nomemcopy -pkg=assets -tags=$(BUILDTAGS) \
-		-debug=$(if $(findstring debug,$(BUILDTAGS)),true,false) \
-		-o=src/ngrok/server/assets/assets_$(BUILDTAGS).go \
+build_assets:
+	./vendor/bin/go-bindata -nomemcopy -pkg=assets \
+		-o=xgrok/server/assets/assets.go \
 		assets/server/...
-
-release-client: BUILDTAGS=release
-release-client: client
-
-release-server: BUILDTAGS=release
-release-server: server
-
-release-all: fmt release-client release-server
-
-all: fmt client server
-
-clean:
-	go clean -i -r ngrok/...
-	rm -rf src/ngrok/client/assets/ src/ngrok/server/assets/
-
-contributors:
-	echo "Contributors to ngrok, both large and small:\n" > CONTRIBUTORS
-	git log --raw | grep "^Author: " | sort | uniq | cut -d ' ' -f2- | sed 's/^/- /' | cut -d '<' -f1 >> CONTRIBUTORS
+	./vendor/bin/go-bindata -nomemcopy -pkg=assets \
+		-o=xgrok/client/assets/assets.go \
+		assets/client/...
