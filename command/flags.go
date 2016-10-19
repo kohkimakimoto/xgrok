@@ -49,7 +49,7 @@ var ServeFlags = []cli.Flag{
 }
 
 func LoadServerOptions(ctx *cli.Context) *server.Options {
-	return &server.Options{
+	opts := &server.Options{
 		Config:  ctx.String("config"),
 		HttpAddr: ctx.String("http-addr"),
 		HttpsAddr: ctx.String("https-addr"),
@@ -60,6 +60,8 @@ func LoadServerOptions(ctx *cli.Context) *server.Options {
 		Logto: ctx.String("log"),
 		Loglevel: ctx.String("log-level"),
 	}
+
+	return opts
 }
 
 var ClientFlags = []cli.Flag{
@@ -69,12 +71,12 @@ var ClientFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:  "log",
-		Value: "stdout",
+		Value: "none",
 		Usage: "Write log messages to this file. 'stdout' and 'none' have special meanings",
 	},
 	cli.StringFlag{
 		Name:  "log-level",
-		Value: "INFO",
+		Value: "DEBUG",
 		Usage: "The level of messages to log. One of: DEBUG, INFO, WARNING, ERROR",
 	},
 
@@ -91,13 +93,13 @@ var ClientFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:  "proto",
+		Value: "http",
 		Usage: "The protocol of the traffic over the tunnel ('http', 'https', 'tcp', 'http+https')",
 	},
 
 	cli.StringFlag{
-		Name:  "server_addr",
+		Name:  "server-addr",
 		EnvVar: "XGROK_SERVER_ADDR",
-		Value: "127.0.0.1:4443",
 		Usage: "The xgrok server address to connet with (default: '127.0.0.1:4443').",
 	},
 }
@@ -105,12 +107,15 @@ var ClientFlags = []cli.Flag{
 
 
 func LoadClientOptions(ctx *cli.Context) *client.Options {
-	return &client.Options{
+	opts := &client.Options{
 		Logto: ctx.String("log"),
 		Loglevel: ctx.String("log-level"),
 		Subdomain:  ctx.String("subdomain"),
 		Hostname: ctx.String("hostname"),
 		Protocol: ctx.String("proto"),
-		ServerAddr: ctx.String("server_addr"),
+		ServerAddr: ctx.String("server-addr"),
+		Args: []string{},
 	}
+
+	return opts
 }

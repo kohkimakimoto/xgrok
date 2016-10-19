@@ -8,11 +8,9 @@ import (
 	"net"
 	"net/url"
 	"os"
-	"os/user"
-	"path"
-	"regexp"
 	"strconv"
 	"strings"
+	"path/filepath"
 )
 
 type Configuration struct {
@@ -40,38 +38,43 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 		configPath = defaultPath()
 	}
 
-	log.Info("Reading configuration file %s", configPath)
-	configBuf, err := ioutil.ReadFile(configPath)
-	if err != nil {
-		// failure to read a configuration file is only a fatal error if
-		// the user specified one explicitly
-		if opts.Config != "" {
-			err = fmt.Errorf("Failed to read configuration file %s: %v", configPath, err)
-			return
-		}
-	}
-
 	// deserialize/parse the config
 	config = new(Configuration)
-	if err = yaml.Unmarshal(configBuf, &config); err != nil {
-		err = fmt.Errorf("Error parsing configuration file %s: %v", configPath, err)
-		return
-	}
 
-	// try to parse the old .xgrok format for backwards compatibility
-	matched := false
-	content := strings.TrimSpace(string(configBuf))
-	if matched, err = regexp.MatchString("^[0-9a-zA-Z_\\-!]+$", content); err != nil {
-		return
-	} else if matched {
-		config = &Configuration{AuthToken: content}
+	if _, staterr := os.Stat(configPath); staterr == nil {
+		log.Info("Reading configuration file %s", configPath)
+		configBuf, ioerr := ioutil.ReadFile(configPath)
+		if ioerr != nil {
+			// failure to read a configuration file is only a fatal error if
+			// the user specified one explicitly
+			if opts.Config != "" {
+				err = fmt.Errorf("Failed to read configuration file %s: %v", configPath, ioerr)
+				return
+			}
+		}
+
+		if ymlerr := yaml.Unmarshal(configBuf, &config); ymlerr != nil {
+			err = fmt.Errorf("Error parsing configuration file %s: %v", configPath, ymlerr)
+			return
+		}
+
+		//// try to parse the old .xgrok format for backwards compatibility
+		//matched := false
+		//content := strings.TrimSpace(string(configBuf))
+		//if matched, err = regexp.MatchString("^[0-9a-zA-Z_\\-!]+$", content); err != nil {
+		//	return
+		//} else if matched {
+		//	config = &Configuration{AuthToken: content}
+		//}
 	}
 
 	// set configuration defaults
 	if config.ServerAddr == "" {
-		// config.ServerAddr = defaultServerAddr
-		err = fmt.Errorf("Require server address.")
-		return
+		if opts.ServerAddr == "" {
+			config.ServerAddr = defaultServerAddr
+		} else {
+			config.ServerAddr = opts.ServerAddr
+		}
 	}
 
 	if config.InspectAddr == "" {
@@ -143,7 +146,7 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 
 	switch opts.Command {
 	// start a single tunnel, the default, simple xgrok behavior
-	case "default":
+	case "tunnel":
 		config.Tunnels = make(map[string]*TunnelConfiguration)
 		config.Tunnels["default"] = &TunnelConfiguration{
 			Subdomain: opts.Subdomain,
@@ -204,18 +207,26 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 }
 
 func defaultPath() string {
-	user, err := user.Current()
-
-	// user.Current() does not work on linux when cross compiling because
-	// it requires CGO; use os.Getenv("HOME") hack until we compile natively
-	homeDir := os.Getenv("HOME")
+	wd, err := os.Getwd()
 	if err != nil {
-		log.Warn("Failed to get user's home directory: %s. Using $HOME: %s", err.Error(), homeDir)
-	} else {
-		homeDir = user.HomeDir
+		log.Warn("Failed to get current working directory: %s", err.Error())
+		return ""
 	}
 
-	return path.Join(homeDir, ".xgrok")
+	return filepath.Join(wd, ".xgrok.yml")
+
+		//user, err := user.Current()
+	//
+	//// user.Current() does not work on linux when cross compiling because
+	//// it requires CGO; use os.Getenv("HOME") hack until we compile natively
+	//homeDir := os.Getenv("HOME")
+	//if err != nil {
+	//	log.Warn("Failed to get user's home directory: %s. Using $HOME: %s", err.Error(), homeDir)
+	//} else {
+	//	homeDir = user.HomeDir
+	//}
+	//
+	//return path.Join(homeDir, ".xgrok")
 }
 
 func normalizeAddress(addr string, propName string) (string, error) {

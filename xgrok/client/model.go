@@ -22,7 +22,7 @@ import (
 
 const (
 	//defaultServerAddr   = "xgrokd.xgrok.com:443"
-	defaultServerAddr   = ""
+	defaultServerAddr   = "127.0.0.1:4443"
 	defaultInspectAddr  = "127.0.0.1:4040"
 	pingInterval        = 20 * time.Second
 	maxPongLatency      = 15 * time.Second
@@ -103,16 +103,17 @@ func newClientModel(config *Configuration, ctl mvc.Controller) *ClientModel {
 	}
 
 	// configure TLS
-	if config.TrustHostRootCerts {
-		m.Info("Trusting host's root certificates")
-		m.tlsConfig = &tls.Config{}
-	} else {
-		m.Info("Trusting root CAs: %v", rootCrtPaths)
-		var err error
-		if m.tlsConfig, err = LoadTLSConfig(rootCrtPaths); err != nil {
-			panic(err)
-		}
-	}
+	//if config.TrustHostRootCerts {
+	//	m.Info("Trusting host's root certificates")
+	//	m.tlsConfig = &tls.Config{}
+	//} else {
+	//	m.Info("Trusting root CAs: %v", rootCrtPaths)
+	//	var err error
+	//	if m.tlsConfig, err = LoadTLSConfig(rootCrtPaths); err != nil {
+	//		panic(err)
+	//	}
+	//}
+	m.tlsConfig = &tls.Config{}
 
 	// configure TLS SNI
 	m.tlsConfig.ServerName = serverName(m.serverAddr)
