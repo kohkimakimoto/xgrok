@@ -10,6 +10,7 @@ import (
 	"github.com/kohkimakimoto/xgrok/xgrok/util"
 	"net/http"
 	"path"
+	"strings"
 )
 
 type WebView struct {
@@ -62,6 +63,11 @@ func NewWebView(ctl mvc.Controller, addr string) *WebView {
 			http.NotFound(w, r)
 			return
 		}
+
+		if strings.HasSuffix(r.URL.Path[1:], ".css") {
+			w.Header().Set("Content-Type","text/css")
+		}
+
 		w.Write(buf)
 	})
 
