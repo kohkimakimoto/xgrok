@@ -22,16 +22,9 @@ func init() {
 	}
 }
 
-func Main() {
-	// parse options
-	opts, err := ParseArgs()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
+func Main(opts *Options) {
 	// set up logging
-	log.LogTo(opts.logto, opts.loglevel)
+	log.LogTo(opts.Logto, opts.Loglevel)
 
 	// read configuration file
 	config, err := LoadConfiguration(opts)

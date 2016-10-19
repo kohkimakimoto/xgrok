@@ -36,17 +36,24 @@ Examples:
 `
 
 type Options struct {
-	config    string
-	logto     string
-	loglevel  string
-	authtoken string
-	httpauth  string
-	hostname  string
-	protocol  string
-	subdomain string
-	command   string
-	args      []string
+	Config    string
+	Logto     string
+	Loglevel  string
+	Authtoken string
+	Httpauth  string
+	Hostname  string
+	Protocol  string
+	ServerAddr string
+	Subdomain string
+	Command   string
+	Args      []string
 }
+
+
+
+
+
+
 
 func ParseArgs() (opts *Options, err error) {
 	flag.Usage = func() {
@@ -98,24 +105,24 @@ func ParseArgs() (opts *Options, err error) {
 	flag.Parse()
 
 	opts = &Options{
-		config:    *config,
-		logto:     *logto,
-		loglevel:  *loglevel,
-		httpauth:  *httpauth,
-		subdomain: *subdomain,
-		protocol:  *protocol,
-		authtoken: *authtoken,
-		hostname:  *hostname,
-		command:   flag.Arg(0),
+		Config:    *config,
+		Logto:     *logto,
+		Loglevel:  *loglevel,
+		Httpauth:  *httpauth,
+		Subdomain: *subdomain,
+		Protocol:  *protocol,
+		Authtoken: *authtoken,
+		Hostname:  *hostname,
+		Command:   flag.Arg(0),
 	}
 
-	switch opts.command {
+	switch opts.Command {
 	case "list":
-		opts.args = flag.Args()[1:]
+		opts.Args = flag.Args()[1:]
 	case "start":
-		opts.args = flag.Args()[1:]
+		opts.Args = flag.Args()[1:]
 	case "start-all":
-		opts.args = flag.Args()[1:]
+		opts.Args = flag.Args()[1:]
 	case "version":
 		fmt.Println(version.MajorMinor())
 		os.Exit(0)
@@ -136,8 +143,8 @@ func ParseArgs() (opts *Options, err error) {
 			return
 		}
 
-		opts.command = "default"
-		opts.args = flag.Args()
+		opts.Command = "default"
+		opts.Args = flag.Args()
 	}
 
 	return

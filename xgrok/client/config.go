@@ -35,7 +35,7 @@ type TunnelConfiguration struct {
 }
 
 func LoadConfiguration(opts *Options) (config *Configuration, err error) {
-	configPath := opts.config
+	configPath := opts.Config
 	if configPath == "" {
 		configPath = defaultPath()
 	}
@@ -45,7 +45,7 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	if err != nil {
 		// failure to read a configuration file is only a fatal error if
 		// the user specified one explicitly
-		if opts.config != "" {
+		if opts.Config != "" {
 			err = fmt.Errorf("Failed to read configuration file %s: %v", configPath, err)
 			return
 		}
@@ -135,29 +135,29 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	}
 
 	// override configuration with command-line options
-	config.LogTo = opts.logto
+	config.LogTo = opts.Logto
 	config.Path = configPath
-	if opts.authtoken != "" {
-		config.AuthToken = opts.authtoken
+	if opts.Authtoken != "" {
+		config.AuthToken = opts.Authtoken
 	}
 
-	switch opts.command {
+	switch opts.Command {
 	// start a single tunnel, the default, simple xgrok behavior
 	case "default":
 		config.Tunnels = make(map[string]*TunnelConfiguration)
 		config.Tunnels["default"] = &TunnelConfiguration{
-			Subdomain: opts.subdomain,
-			Hostname:  opts.hostname,
-			HttpAuth:  opts.httpauth,
+			Subdomain: opts.Subdomain,
+			Hostname:  opts.Hostname,
+			HttpAuth:  opts.Httpauth,
 			Protocols: make(map[string]string),
 		}
 
-		for _, proto := range strings.Split(opts.protocol, "+") {
+		for _, proto := range strings.Split(opts.Protocol, "+") {
 			if err = validateProtocol(proto, "default"); err != nil {
 				return
 			}
 
-			if config.Tunnels["default"].Protocols[proto], err = normalizeAddress(opts.args[0], ""); err != nil {
+			if config.Tunnels["default"].Protocols[proto], err = normalizeAddress(opts.Args[0], ""); err != nil {
 				return
 			}
 		}
@@ -171,13 +171,13 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 
 	// start tunnels
 	case "start":
-		if len(opts.args) == 0 {
+		if len(opts.Args) == 0 {
 			err = fmt.Errorf("You must specify at least one tunnel to start")
 			return
 		}
 
 		requestedTunnels := make(map[string]bool)
-		for _, arg := range opts.args {
+		for _, arg := range opts.Args {
 			requestedTunnels[arg] = true
 
 			if _, ok := config.Tunnels[arg]; !ok {
@@ -196,7 +196,7 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 		return
 
 	default:
-		err = fmt.Errorf("Unknown command: %s", opts.command)
+		err = fmt.Errorf("Unknown command: %s", opts.Command)
 		return
 	}
 

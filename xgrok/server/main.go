@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime/debug"
 	"time"
+	"fmt"
 )
 
 const (
@@ -23,7 +24,7 @@ var (
 	controlRegistry *ControlRegistry
 
 	// XXX: kill these global variables - they're only used in tunnel.go for constructing forwarding URLs
-	opts      *Options
+	configuration      *Configuration
 	listeners map[string]*conn.Listener
 )
 
@@ -98,12 +99,16 @@ func tunnelListener(addr string, tlsConfig *tls.Config) {
 	}
 }
 
-func Main() {
-	// parse options
-	opts = parseArgs()
+func Main(opts *Options) {
+	log.LogTo(opts.Logto, opts.Loglevel)
 
-	// init logging
-	log.LogTo(opts.logto, opts.loglevel)
+	// read configuration file
+	c, err := LoadConfiguration(opts)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	configuration = c
 
 	// seed random number generator
 	seed, err := util.RandomSeed()
@@ -121,21 +126,21 @@ func Main() {
 	listeners = make(map[string]*conn.Listener)
 
 	// load tls configuration
-	tlsConfig, err := LoadTLSConfig(opts.tlsCrt, opts.tlsKey)
+	tlsConfig, err := LoadTLSConfig(configuration.TlsCrt, configuration.TlsKey)
 	if err != nil {
 		panic(err)
 	}
 
 	// listen for http
-	if opts.httpAddr != "" {
-		listeners["http"] = startHttpListener(opts.httpAddr, nil)
+	if configuration.HttpAddr != "" {
+		listeners["http"] = startHttpListener(configuration.HttpAddr, nil)
 	}
 
 	// listen for https
-	if opts.httpsAddr != "" {
-		listeners["https"] = startHttpListener(opts.httpsAddr, tlsConfig)
+	if configuration.HttpsAddr != "" {
+		listeners["https"] = startHttpListener(configuration.HttpsAddr, tlsConfig)
 	}
 
 	// xgrok clients
-	tunnelListener(opts.tunnelAddr, tlsConfig)
+	tunnelListener(configuration.TunnelAddr, tlsConfig)
 }

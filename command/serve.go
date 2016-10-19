@@ -9,10 +9,11 @@ var ServeCommand = cli.Command{
 	Name:   "serve",
 	Usage:  "Run xgrok server.",
 	Action: serveAction,
+	Flags:  ServeFlags,
 }
 
 func serveAction(ctx *cli.Context) error {
-	server.Main()
-
+	opts := LoadServerOptions(ctx)
+	server.Main(opts)
 	return nil
 }

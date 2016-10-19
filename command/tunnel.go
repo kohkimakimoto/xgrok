@@ -7,12 +7,19 @@ import (
 
 var TunnelCommand = cli.Command{
 	Name:   "tunnel",
-	Usage:  "start a tunnel",
+	Usage:  "Start a tunnel",
 	Action: tunnelAction,
+	Flags: ClientFlags,
+	Description: `Start a tunnel.
+
+Example:
+  xgrok tunnel 8080
+  xgrok tunnel --subdomain=example 8080
+`,
 }
 
 func tunnelAction(ctx *cli.Context) error {
-	client.Main()
-
+	opts := LoadClientOptions(ctx)
+	client.Main(opts)
 	return nil
 }

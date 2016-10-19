@@ -12,11 +12,17 @@ func LogTo(target string, level_name string) {
 
 	switch target {
 	case "stdout":
-		writer = log.NewConsoleLogWriter()
+		w := log.NewConsoleLogWriter()
+
+		w.SetFormat("[%T %D] [%L] %M")
+		writer = w
 	case "none":
 		// no logging
 	default:
-		writer = log.NewFileLogWriter(target, true)
+		w := log.NewFileLogWriter(target, true)
+
+		w.SetFormat("[%T %D] [%L] %M")
+		writer = w
 	}
 
 	if writer != nil {
