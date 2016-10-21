@@ -1,0 +1,2 @@
+USER="xgrok"
+OPTIONS="--config=/etc/xgrok/xgrok.yml"

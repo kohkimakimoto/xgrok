@@ -1,0 +1,127 @@
+#!/bin/bash
+#
+# xgrok       xgrok server
+#
+# chkconfig:   - 95 95
+# description: Introspected tunnels to localhost.
+# processname: xgrok
+# pidfile: /var/run/xgrok.pid
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+# pull in sysconfig settings
+[ -e /etc/sysconfig/xgrok ] && . /etc/sysconfig/xgrok
+
+prog="xgrok"
+exec=${EXEC-/usr/bin/$prog}
+user=${USER-xgrok}
+pidfile=${PIDFILE-/var/run/$prog.pid}
+lockfile=${LOCKFILE-/var/lock/subsys/$prog}
+logfile=${LOCKFILE-/var/log/xgrok/$prog.log}
+
+start() {
+    [ -x $exec ] || exit 5
+
+    [ -f $conffile ] || exit 6
+    [ -d $confdir ] || exit 6
+
+    touch $logfile $pidfile
+    chown $user:$user $logfile $pidfile
+
+    echo -n $"Starting $prog: "
+
+    ## holy shell shenanigans, batman!
+    ## daemon can't be backgrounded.  we need the pid of the spawned process,
+    ## which is actually done via runuser thanks to --user.  you can't do "cmd
+    ## &; action" but you can do "{cmd &}; action".
+    daemon \
+        --pidfile=$pidfile \
+        --user=$user \
+        " { $exec serve $OPTIONS >> $logfile 2>&1 & } ; echo \$! >| $pidfile "
+
+    RETVAL=$?
+    echo
+
+    [ $RETVAL -eq 0 ] && touch $lockfile
+
+    # wait for listening a socket...
+    if [ $RETVAL -eq 0 ]; then
+        while :
+        do
+            if [ -x "`which ss`" ]; then
+                ss -pl | grep $prog > /dev/null
+            else
+                netstat -lp | grep $prog > /dev/null
+            fi
+            if [ $? -eq 0 ]; then
+                break
+            fi
+            sleep 1
+        done
+    fi
+
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    ## shutdown with SIGTERM
+    killproc -p $pidfile $exec -TERM 2
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ]; then
+        while :
+        do
+            if [ -x "`which ss`" ]; then
+                ss -pl | grep $prog > /dev/null
+            else
+                netstat -lp | grep $prog > /dev/null
+            fi
+            if [ $? -ne 0 ]; then
+                break
+            fi
+            sleep 1
+        done
+        rm -f $pidfile $lockfile
+    fi
+    echo
+    return $RETVAL
+}
+
+restart() {
+    stop
+    start
+}
+
+rh_status() {
+    status -p "$pidfile" -l $prog $exec
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        restart
+        ;;
+    status)
+        rh_status
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|reload}"
+        exit 2
+esac
+
+exit $?

@@ -1,0 +1,45 @@
+package client
+
+import (
+	"fmt"
+	"github.com/inconshreveable/mousetrap"
+	"github.com/kohkimakimoto/xgrok/xgrok/log"
+	"github.com/kohkimakimoto/xgrok/xgrok/util"
+	"math/rand"
+	"os"
+	"runtime"
+	"time"
+)
+
+func init() {
+	if runtime.GOOS == "windows" {
+		if mousetrap.StartedByExplorer() {
+			fmt.Println("Don't double-click xgrok!")
+			fmt.Println("You need to open cmd.exe and run it from the command line!")
+			time.Sleep(5 * time.Second)
+			os.Exit(1)
+		}
+	}
+}
+
+func Main(opts *Options) {
+	// set up logging
+	log.LogTo(opts.Logto, opts.Loglevel)
+
+	// read configuration file
+	config, err := LoadConfiguration(opts)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// seed random number generator
+	seed, err := util.RandomSeed()
+	if err != nil {
+		fmt.Printf("Couldn't securely seed the random number generator!")
+		os.Exit(1)
+	}
+	rand.Seed(seed)
+
+	NewController().Run(config)
+}
