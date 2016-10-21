@@ -66,8 +66,8 @@ start() {
 
 stop() {
     echo -n $"Stopping $prog: "
-    ## graceful shutdown with SIGINT
-    killproc -p $pidfile $exec -INT 2
+    ## shutdown with SIGTERM
+    killproc -p $pidfile $exec -TERM 2
     RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
         while :
