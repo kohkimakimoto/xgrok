@@ -25,6 +25,8 @@ func realMain() (status int) {
 	CLI.Usage = xgrok.Usage
 	CLI.Version = xgrok.Version
 	CLI.Commands = []cli.Command{
+		command.InitCommand,
+		command.ListCommand,
 		command.TunnelCommand,
 		command.ServeCommand,
 		command.StartCommand,

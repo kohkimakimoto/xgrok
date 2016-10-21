@@ -17,7 +17,9 @@ type Configuration struct {
 	HttpProxy          string                          `yaml:"http_proxy,omitempty"`
 	ServerAddr         string                          `yaml:"server_addr,omitempty"`
 	InspectAddr        string                          `yaml:"inspect_addr,omitempty"`
-	TrustHostRootCerts bool                            `yaml:"trust_host_root_certs,omitempty"`
+	// I implemented xgrok to be used for self hosting. It should not use embedded crt file as a original 'ngrok'.
+	// So it always uses host root cert.
+	// TrustHostRootCerts bool                            `yaml:"trust_host_root_certs,omitempty"`
 	InsecureSkipVerify bool                            `yaml:"insecure_skip_verify,omitempty"`
 	AuthToken          string                          `yaml:"auth_token,omitempty"`
 	Tunnels            map[string]*TunnelConfiguration `yaml:"tunnels,omitempty"`
@@ -36,12 +38,11 @@ type TunnelConfiguration struct {
 func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	configPath := opts.Config
 	if configPath == "" {
-		configPath = defaultPath()
+		configPath = DefaultConfigPath()
 	}
 
 	// deserialize/parse the config
 	config = new(Configuration)
-
 	if _, staterr := os.Stat(configPath); staterr == nil {
 		log.Info("Reading configuration file %s", configPath)
 		configBuf, ioerr := ioutil.ReadFile(configPath)
@@ -150,9 +151,6 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	if opts.InsecureSkipVerify {
 		config.InsecureSkipVerify = opts.InsecureSkipVerify
 	}
-	if opts.TrustHostRootCerts {
-		config.TrustHostRootCerts = opts.TrustHostRootCerts
-	}
 	if opts.Authtoken != "" {
 		config.AuthToken = opts.Authtoken
 	}
@@ -219,7 +217,7 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	return
 }
 
-func defaultPath() string {
+func DefaultConfigPath() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Warn("Failed to get current working directory: %s", err.Error())

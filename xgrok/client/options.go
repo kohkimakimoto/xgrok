@@ -10,7 +10,6 @@ type Options struct {
 	Protocol           string
 	ServerAddr         string
 	InspectAddr        string
-	TrustHostRootCerts bool
 	InsecureSkipVerify bool
 	Subdomain          string
 	Command            string

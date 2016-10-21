@@ -78,10 +78,6 @@ var ClientFlags = []cli.Flag{
 		Value: "DEBUG",
 		Usage: "The level of messages to log. One of: DEBUG, INFO, WARNING, ERROR",
 	},
-
-	// TODO:
-	// authtoken, httpauth is not supported now...
-
 	cli.StringFlag{
 		Name:  "subdomain",
 		Usage: "Request a custom subdomain from the xgrok server. (HTTP only)",
@@ -110,11 +106,8 @@ var ClientFlags = []cli.Flag{
 		EnvVar: "XGROK_INSECURE_SKIP_VERIFY",
 		Usage:  "TLS accepts any certificate. This should be used only for testing.",
 	},
-	cli.BoolFlag{
-		Name: "trust-host-root-certs",
-		EnvVar: "XGROK_TRUST_HOST_ROOT_CERTS",
-		Usage:  "Trust root certicifates in your host machine.",
-	},
+	// TODO:
+	// authtoken, httpauth is not supported now...
 }
 
 func LoadClientOptions(ctx *cli.Context) *client.Options {
@@ -127,7 +120,6 @@ func LoadClientOptions(ctx *cli.Context) *client.Options {
 		ServerAddr:         ctx.String("server-addr"),
 		InspectAddr:        ctx.String("inspect-addr"),
 		InsecureSkipVerify: ctx.Bool("insecure-skip-verify"),
-		TrustHostRootCerts: ctx.Bool("trust-host-root-certs"),
 		Args:               []string{},
 	}
 
