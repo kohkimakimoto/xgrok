@@ -6,7 +6,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"runtime"
@@ -93,28 +92,6 @@ var logRecordWriteTests = []struct {
 	},
 }
 
-func TestConsoleLogWriter(t *testing.T) {
-	console := make(ConsoleLogWriter)
-
-	r, w := io.Pipe()
-	go console.run(w)
-	defer console.Close()
-
-	buf := make([]byte, 1024)
-
-	for _, test := range logRecordWriteTests {
-		name := test.Test
-
-		console.LogWrite(test.Record)
-		n, _ := r.Read(buf)
-
-		if got, want := string(buf[:n]), test.Console; got != want {
-			t.Errorf("%s:  got %q", name, got)
-			t.Errorf("%s: want %q", name, want)
-		}
-	}
-}
-
 func TestFileLogWriter(t *testing.T) {
 	defer func(buflen int) {
 		LogBufferLength = buflen
@@ -138,28 +115,28 @@ func TestFileLogWriter(t *testing.T) {
 	}
 }
 
-func TestXMLLogWriter(t *testing.T) {
-	defer func(buflen int) {
-		LogBufferLength = buflen
-	}(LogBufferLength)
-	LogBufferLength = 0
-
-	w := NewXMLLogWriter(testLogFile, false)
-	if w == nil {
-		t.Fatalf("Invalid return: w should not be nil")
-	}
-	defer os.Remove(testLogFile)
-
-	w.LogWrite(newLogRecord(CRITICAL, "source", "message"))
-	w.Close()
-	runtime.Gosched()
-
-	if contents, err := ioutil.ReadFile(testLogFile); err != nil {
-		t.Errorf("read(%q): %s", testLogFile, err)
-	} else if len(contents) != 185 {
-		t.Errorf("malformed xmllog: %q (%d bytes)", string(contents), len(contents))
-	}
-}
+//func TestXMLLogWriter(t *testing.T) {
+//	defer func(buflen int) {
+//		LogBufferLength = buflen
+//	}(LogBufferLength)
+//	LogBufferLength = 0
+//
+//	w := NewXMLLogWriter(testLogFile, false)
+//	if w == nil {
+//		t.Fatalf("Invalid return: w should not be nil")
+//	}
+//	defer os.Remove(testLogFile)
+//
+//	w.LogWrite(newLogRecord(CRITICAL, "source", "message"))
+//	w.Close()
+//	runtime.Gosched()
+//
+//	if contents, err := ioutil.ReadFile(testLogFile); err != nil {
+//		t.Errorf("read(%q): %s", testLogFile, err)
+//	} else if len(contents) != 185 {
+//		t.Errorf("malformed xmllog: %q (%d bytes)", string(contents), len(contents))
+//	}
+//}
 
 func TestLogger(t *testing.T) {
 	sl := NewDefaultLogger(WARNING)
@@ -383,9 +360,6 @@ func TestXMLConfig(t *testing.T) {
 	}
 
 	// Make sure they're the right type
-	if _, ok := log["stdout"].LogWriter.(ConsoleLogWriter); !ok {
-		t.Fatalf("XMLConfig: Expected stdout to be ConsoleLogWriter, found %T", log["stdout"].LogWriter)
-	}
 	if _, ok := log["file"].LogWriter.(*FileLogWriter); !ok {
 		t.Fatalf("XMLConfig: Expected file to be *FileLogWriter, found %T", log["file"].LogWriter)
 	}

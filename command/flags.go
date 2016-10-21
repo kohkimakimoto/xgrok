@@ -1,11 +1,10 @@
 package command
 
 import (
-	"github.com/urfave/cli"
 	"github.com/kohkimakimoto/xgrok/xgrok/client"
 	"github.com/kohkimakimoto/xgrok/xgrok/server"
+	"github.com/urfave/cli"
 )
-
 
 var ServeFlags = []cli.Flag{
 	cli.StringFlag{
@@ -50,15 +49,15 @@ var ServeFlags = []cli.Flag{
 
 func LoadServerOptions(ctx *cli.Context) *server.Options {
 	opts := &server.Options{
-		Config:  ctx.String("config"),
-		HttpAddr: ctx.String("http-addr"),
-		HttpsAddr: ctx.String("https-addr"),
+		Config:     ctx.String("config"),
+		HttpAddr:   ctx.String("http-addr"),
+		HttpsAddr:  ctx.String("https-addr"),
 		TunnelAddr: ctx.String("tunnel-addr"),
-		Domain: ctx.String("domain"),
-		TlsCrt: ctx.String("tls-crt"),
-		TlsKey: ctx.String("tls-key"),
-		Logto: ctx.String("log"),
-		Loglevel: ctx.String("log-level"),
+		Domain:     ctx.String("domain"),
+		TlsCrt:     ctx.String("tls-crt"),
+		TlsKey:     ctx.String("tls-key"),
+		Logto:      ctx.String("log"),
+		Loglevel:   ctx.String("log-level"),
 	}
 
 	return opts
@@ -97,37 +96,39 @@ var ClientFlags = []cli.Flag{
 		Usage: "The protocol of the traffic over the tunnel ('http', 'https', 'tcp', 'http+https')",
 	},
 	cli.StringFlag{
-		Name:  "server-addr",
+		Name:   "server-addr, s",
 		EnvVar: "XGROK_SERVER_ADDR",
-		Usage: "The xgrok server address to connet with (default: '127.0.0.1:4443').",
+		Usage:  "The xgrok server address to connet with (default: '127.0.0.1:4443').",
 	},
 	cli.StringFlag{
-		Name:  "inspect-addr",
+		Name:   "inspect-addr",
 		EnvVar: "XGROK_INSPECT_ADDR",
-		Usage: "The client inspect address (default: '127.0.0.1:4040').",
+		Usage:  "The client inspect address (default: '127.0.0.1:4040').",
 	},
 	cli.BoolFlag{
-		Name:  "insecure-skip-verify",
+		Name:   "insecure-skip-verify, i",
 		EnvVar: "XGROK_INSECURE_SKIP_VERIFY",
-		Usage: "TLS accepts any certificate. This should be used only for testing.",
+		Usage:  "TLS accepts any certificate. This should be used only for testing.",
 	},
-
-	// InsecureSkipVerify
+	cli.BoolFlag{
+		Name: "trust-host-root-certs",
+		EnvVar: "XGROK_TRUST_HOST_ROOT_CERTS",
+		Usage:  "Trust root certicifates in your host machine.",
+	},
 }
-
-
 
 func LoadClientOptions(ctx *cli.Context) *client.Options {
 	opts := &client.Options{
-		Logto: ctx.String("log"),
-		Loglevel: ctx.String("log-level"),
-		Subdomain:  ctx.String("subdomain"),
-		Hostname: ctx.String("hostname"),
-		Protocol: ctx.String("proto"),
-		ServerAddr: ctx.String("server-addr"),
-		InspectAddr: ctx.String("inspect-addr"),
+		Logto:              ctx.String("log"),
+		Loglevel:           ctx.String("log-level"),
+		Subdomain:          ctx.String("subdomain"),
+		Hostname:           ctx.String("hostname"),
+		Protocol:           ctx.String("proto"),
+		ServerAddr:         ctx.String("server-addr"),
+		InspectAddr:        ctx.String("inspect-addr"),
 		InsecureSkipVerify: ctx.Bool("insecure-skip-verify"),
-		Args: []string{},
+		TrustHostRootCerts: ctx.Bool("trust-host-root-certs"),
+		Args:               []string{},
 	}
 
 	return opts

@@ -1,21 +1,21 @@
 package client
 
 type Options struct {
-	Config    string
-	Logto     string
-	Loglevel  string
-	Authtoken string
-	Httpauth  string
-	Hostname  string
-	Protocol  string
-	ServerAddr string
-	InspectAddr string
+	Config             string
+	Logto              string
+	Loglevel           string
+	Authtoken          string
+	Httpauth           string
+	Hostname           string
+	Protocol           string
+	ServerAddr         string
+	InspectAddr        string
+	TrustHostRootCerts bool
 	InsecureSkipVerify bool
-	Subdomain string
-	Command   string
-	Args      []string
+	Subdomain          string
+	Command            string
+	Args               []string
 }
-
 
 //
 //const usage1 string = `Usage: %s [OPTIONS] <local port or address>

@@ -53,7 +53,7 @@ type Tunnel struct {
 func registerVhost(t *Tunnel, protocol string, servingPort int) (err error) {
 	vhost := os.Getenv("VHOST")
 	if vhost == "" {
-		vhost = fmt.Sprintf("%s:%d", configuration.Domain, servingPort)
+		vhost = fmt.Sprintf("%s:%d", config.Domain, servingPort)
 	}
 
 	// Canonicalize virtual host by removing default port (e.g. :80 on HTTP)
@@ -113,7 +113,7 @@ func NewTunnel(m *msg.ReqTunnel, ctl *Control) (t *Tunnel, err error) {
 
 			// create the url
 			addr := t.listener.Addr().(*net.TCPAddr)
-			t.url = fmt.Sprintf("tcp://%s:%d", configuration.Domain, addr.Port)
+			t.url = fmt.Sprintf("tcp://%s:%d", config.Domain, addr.Port)
 
 			// register it
 			if err = tunnelRegistry.RegisterAndCache(t.url, t); err != nil {

@@ -9,6 +9,7 @@ pkg/
 /vendor
 .vagrant
 .env
+xgrok.yml
 
 xgrok/client/assets
 xgrok/server/assets

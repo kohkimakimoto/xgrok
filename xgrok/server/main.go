@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/tls"
+	"fmt"
 	"github.com/kohkimakimoto/xgrok/xgrok/conn"
 	log "github.com/kohkimakimoto/xgrok/xgrok/log"
 	"github.com/kohkimakimoto/xgrok/xgrok/msg"
@@ -10,7 +11,6 @@ import (
 	"os"
 	"runtime/debug"
 	"time"
-	"fmt"
 )
 
 const (
@@ -24,7 +24,7 @@ var (
 	controlRegistry *ControlRegistry
 
 	// XXX: kill these global variables - they're only used in tunnel.go for constructing forwarding URLs
-	configuration      *Configuration
+	config    *Configuration
 	listeners map[string]*conn.Listener
 )
 
@@ -64,6 +64,10 @@ func tunnelListener(addr string, tlsConfig *tls.Config) {
 	}
 
 	log.Info("Listening for control and proxy connections on %s", listener.Addr.String())
+	if tlsConfig == nil {
+		log.Warn("The control and proxy connections are not TLS connection. You have a risk about secure netwoking.")
+	}
+
 	for c := range listener.Conns {
 		go func(tunnelConn conn.Conn) {
 			// don't crash on panics
@@ -108,7 +112,7 @@ func Main(opts *Options) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	configuration = c
+	config = c
 
 	// seed random number generator
 	seed, err := util.RandomSeed()
@@ -126,21 +130,24 @@ func Main(opts *Options) {
 	listeners = make(map[string]*conn.Listener)
 
 	// load tls configuration
-	tlsConfig, err := LoadTLSConfig(configuration.TlsCrt, configuration.TlsKey)
+	if config.TlsCrt == "" {
+		log.Warn("Using bundled snakeoil certificate, so you have a risk about secure networking of the tunnel. Check configuration 'tls_crt' and 'tls_key'.")
+	}
+
+	tlsConfig, err := LoadTLSConfig(config.TlsCrt, config.TlsKey)
 	if err != nil {
 		panic(err)
 	}
 
 	// listen for http
-	if configuration.HttpAddr != "" {
-		listeners["http"] = startHttpListener(configuration.HttpAddr, nil)
+	if config.HttpAddr != "" {
+		listeners["http"] = startHttpListener(config.HttpAddr, nil)
 	}
 
 	// listen for https
-	if configuration.HttpsAddr != "" {
-		listeners["https"] = startHttpListener(configuration.HttpsAddr, tlsConfig)
+	if config.HttpsAddr != "" {
+		listeners["https"] = startHttpListener(config.HttpsAddr, tlsConfig)
 	}
 
-	// xgrok clients
-	tunnelListener(configuration.TunnelAddr, tlsConfig)
+	tunnelListener(config.TunnelAddr, tlsConfig)
 }

@@ -1,8 +1,8 @@
 package server
 
 import (
+	"github.com/kohkimakimoto/xgrok/support/yaml-template"
 	"io/ioutil"
-	"gopkg.in/yaml.v1"
 )
 
 type Configuration struct {
@@ -18,7 +18,7 @@ type Configuration struct {
 
 func LoadConfiguration(opts *Options) (*Configuration, error) {
 	config := &Configuration{
-		HttpAddr: ":80",
+		HttpAddr:   ":80",
 		TunnelAddr: ":4443",
 	}
 
@@ -29,11 +29,10 @@ func LoadConfiguration(opts *Options) (*Configuration, error) {
 			return nil, err
 		}
 
-		if err := yaml.Unmarshal(configBuf, &config); err != nil {
+		if err := template.UnmarshalWithEnv(configBuf, &config); err != nil {
 			return nil, err
 		}
 	}
-
 
 	// override configuration with command-line options
 	config.Logto = opts.Logto

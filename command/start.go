@@ -6,10 +6,10 @@ import (
 )
 
 var StartCommand = cli.Command{
-	Name:   "start",
-	Usage:  "Start tunnels by name from config file",
-	Action: startAction,
-	Flags: ClientFlags,
+	Name:      "start",
+	Usage:     "Start tunnels by name from config file",
+	Action:    startAction,
+	Flags:     ClientFlags,
 	ArgsUsage: "[<tunnel...>]",
 	Description: `Start tunnels by name from config file.
 

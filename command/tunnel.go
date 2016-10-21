@@ -1,17 +1,17 @@
 package command
 
 import (
+	"errors"
+	"fmt"
 	"github.com/kohkimakimoto/xgrok/xgrok/client"
 	"github.com/urfave/cli"
-	"fmt"
-	"errors"
 )
 
 var TunnelCommand = cli.Command{
-	Name:   "tunnel",
-	Usage:  "Start a tunnel",
-	Action: tunnelAction,
-	Flags: ClientFlags,
+	Name:      "tunnel",
+	Usage:     "Start a tunnel",
+	Action:    tunnelAction,
+	Flags:     ClientFlags,
 	ArgsUsage: "<port>",
 	Description: `Start a tunnel.
 
@@ -25,7 +25,7 @@ Example:
 func tunnelAction(ctx *cli.Context) error {
 	opts := LoadClientOptions(ctx)
 	opts.Command = "tunnel"
-	if ctx.NArg() == 0{
+	if ctx.NArg() == 0 {
 		return errors.New("Error: Specify a local port to tunnel to, or an xgrok command.\n\nExample: To expose port 80, run 'xgrok tunnel 80'")
 	}
 

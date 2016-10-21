@@ -2,25 +2,23 @@ package client
 
 import (
 	"fmt"
+	"github.com/kohkimakimoto/xgrok/support/yaml-template"
 	"github.com/kohkimakimoto/xgrok/xgrok/log"
-	"gopkg.in/yaml.v1"
 	"io/ioutil"
 	"net"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
-	"path/filepath"
 )
 
 type Configuration struct {
 	HttpProxy          string                          `yaml:"http_proxy,omitempty"`
 	ServerAddr         string                          `yaml:"server_addr,omitempty"`
 	InspectAddr        string                          `yaml:"inspect_addr,omitempty"`
-	// I implemented xgrok to be used for self hosting. It should not use embedded crt file as a original 'ngrok'.
-	// So it always uses host root cert.
-	// TrustHostRootCerts bool                            `yaml:"trust_host_root_certs,omitempty"`
-	InsecureSkipVerify bool `yaml:"insecure_skip_verify,omitempty"`
+	TrustHostRootCerts bool                            `yaml:"trust_host_root_certs,omitempty"`
+	InsecureSkipVerify bool                            `yaml:"insecure_skip_verify,omitempty"`
 	AuthToken          string                          `yaml:"auth_token,omitempty"`
 	Tunnels            map[string]*TunnelConfiguration `yaml:"tunnels,omitempty"`
 	LogTo              string                          `yaml:"-"`
@@ -56,10 +54,12 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 			}
 		}
 
-		if ymlerr := yaml.Unmarshal(configBuf, &config); ymlerr != nil {
+		if ymlerr := template.UnmarshalWithEnv(configBuf, &config); ymlerr != nil {
 			err = fmt.Errorf("Error parsing configuration file %s: %v", configPath, ymlerr)
 			return
 		}
+
+		// xgrok does not need to support BC for ngrok
 
 		//// try to parse the old .ngrok format for backwards compatibility
 		//matched := false
@@ -150,6 +150,9 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	if opts.InsecureSkipVerify {
 		config.InsecureSkipVerify = opts.InsecureSkipVerify
 	}
+	if opts.TrustHostRootCerts {
+		config.TrustHostRootCerts = opts.TrustHostRootCerts
+	}
 	if opts.Authtoken != "" {
 		config.AuthToken = opts.Authtoken
 	}
@@ -223,9 +226,9 @@ func defaultPath() string {
 		return ""
 	}
 
-	return filepath.Join(wd, ".xgrok.yml")
+	return filepath.Join(wd, "xgrok.yml")
 
-		//user, err := user.Current()
+	//user, err := user.Current()
 	//
 	//// user.Current() does not work on linux when cross compiling because
 	//// it requires CGO; use os.Getenv("HOME") hack until we compile natively
@@ -267,33 +270,33 @@ func validateProtocol(proto, propName string) (err error) {
 	return
 }
 
-func SaveAuthToken(configPath, authtoken string) (err error) {
-	// empty configuration by default for the case that we can't read it
-	c := new(Configuration)
-
-	// read the configuration
-	oldConfigBytes, err := ioutil.ReadFile(configPath)
-	if err == nil {
-		// unmarshal if we successfully read the configuration file
-		if err = yaml.Unmarshal(oldConfigBytes, c); err != nil {
-			return
-		}
-	}
-
-	// no need to save, the authtoken is already the correct value
-	if c.AuthToken == authtoken {
-		return
-	}
-
-	// update auth token
-	c.AuthToken = authtoken
-
-	// rewrite configuration
-	newConfigBytes, err := yaml.Marshal(c)
-	if err != nil {
-		return
-	}
-
-	err = ioutil.WriteFile(configPath, newConfigBytes, 0600)
-	return
-}
+//func SaveAuthToken(configPath, authtoken string) (err error) {
+//	// empty configuration by default for the case that we can't read it
+//	c := new(Configuration)
+//
+//	// read the configuration
+//	oldConfigBytes, err := ioutil.ReadFile(configPath)
+//	if err == nil {
+//		// unmarshal if we successfully read the configuration file
+//		if err = yaml.Unmarshal(oldConfigBytes, c); err != nil {
+//			return
+//		}
+//	}
+//
+//	// no need to save, the authtoken is already the correct value
+//	if c.AuthToken == authtoken {
+//		return
+//	}
+//
+//	// update auth token
+//	c.AuthToken = authtoken
+//
+//	// rewrite configuration
+//	newConfigBytes, err := yaml.Marshal(c)
+//	if err != nil {
+//		return
+//	}
+//
+//	err = ioutil.WriteFile(configPath, newConfigBytes, 0600)
+//	return
+//}

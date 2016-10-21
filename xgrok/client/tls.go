@@ -9,6 +9,10 @@ import (
 	"github.com/kohkimakimoto/xgrok/xgrok/client/assets"
 )
 
+var (
+	rootCrtPaths = []string{"assets/client/tls/snakeoilca.crt"}
+)
+
 func LoadTLSConfig(rootCertPaths []string) (*tls.Config, error) {
 	pool := x509.NewCertPool()
 
@@ -33,4 +37,3 @@ func LoadTLSConfig(rootCertPaths []string) (*tls.Config, error) {
 
 	return &tls.Config{RootCAs: pool}, nil
 }
-

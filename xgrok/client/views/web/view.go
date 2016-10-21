@@ -65,7 +65,7 @@ func NewWebView(ctl mvc.Controller, addr string) *WebView {
 		}
 
 		if strings.HasSuffix(r.URL.Path[1:], ".css") {
-			w.Header().Set("Content-Type","text/css")
+			w.Header().Set("Content-Type", "text/css")
 		}
 
 		w.Write(buf)

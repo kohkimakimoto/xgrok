@@ -6,10 +6,10 @@ import (
 )
 
 var StartAllCommand = cli.Command{
-	Name:   "start-all",
-	Usage:  "Start all tunnels defined in config file",
-	Action: startAllAction,
-	Flags: ClientFlags,
+	Name:      "start-all",
+	Usage:     "Start all tunnels defined in config file",
+	Action:    startAllAction,
+	Flags:     ClientFlags,
 	ArgsUsage: " ",
 	Description: `Start all tunnels defined in config file.
 

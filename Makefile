@@ -17,6 +17,12 @@ packaging_destroy:
 fmt:
 	go fmt $$(go list ./... | grep -v vendor)
 
+test:
+	go test -cover $$(go list ./... | grep -v vendor)
+
+testv:
+	go test -cover -v $$(go list ./... | grep -v vendor)
+
 deps:
 	gom install
 
