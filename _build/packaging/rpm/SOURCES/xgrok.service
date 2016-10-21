@@ -1,0 +1,14 @@
+[Unit]
+Description=Introspected tunnels to localhost.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=xgrok
+Group=xgrok
+EnvironmentFile=-/etc/sysconfig/xgrok
+ExecStart=/usr/bin/xgrok serve $OPTIONS
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
