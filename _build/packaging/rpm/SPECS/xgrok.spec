@@ -63,7 +63,7 @@ rm -rf %{buildroot}
 %if 0%{?fedora} >= 14 || 0%{?rhel} >= 7
 %{_unitdir}/%{name}.service
 %else
-%{_initrddir}/%{name}
+%attr(755, root, root) %{_initrddir}/%{name}
 %endif
 %attr(755, root, root) %{_bindir}/%{name}
 %attr(644, root, root) %{_sysconfdir}/logrotate.d/%{name}
