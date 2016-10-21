@@ -12,11 +12,13 @@ var TunnelCommand = cli.Command{
 	Usage:  "Start a tunnel",
 	Action: tunnelAction,
 	Flags: ClientFlags,
+	ArgsUsage: "<port>",
 	Description: `Start a tunnel.
 
 Example:
-  xgrok tunnel 8080
-  xgrok tunnel --subdomain=example 8080
+  xgrok tunnel 8000                       # forward xgrok server subdomain to local port 8000
+  xgrok tunnel --subdomain=bar 8000       # request subdomain name: 'bar.your_server'
+  xgrok tunnel --hostname=ex.com 8000     # request tunnel 'ex.com' (DNS CNAME)
 `,
 }
 

@@ -34,6 +34,3 @@ func LoadTLSConfig(rootCertPaths []string) (*tls.Config, error) {
 	return &tls.Config{RootCAs: pool}, nil
 }
 
-func useInsecureSkipVerify() bool {
-	return true
-}

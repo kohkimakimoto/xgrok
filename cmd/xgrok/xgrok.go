@@ -27,6 +27,8 @@ func realMain() (status int) {
 	CLI.Commands = []cli.Command{
 		command.TunnelCommand,
 		command.ServeCommand,
+		command.StartCommand,
+		command.StartAllCommand,
 	}
 
 	if err := CLI.Run(os.Args); err != nil {

@@ -1,23 +1,13 @@
 package version
 
 import (
-	"fmt"
+	"github.com/kohkimakimoto/xgrok/xgrok"
 )
 
 const (
 	Proto = "2"
-	Major = "1"
-	Minor = "7"
 )
 
 func MajorMinor() string {
-	return fmt.Sprintf("%s.%s", Major, Minor)
+	return xgrok.Version
 }
-
-//func Full() string {
-//	return fmt.Sprintf("%s-%s.%s", Proto, Major, Minor)
-//}
-//
-//func Compat(client string, server string) bool {
-//	return client == server
-//}

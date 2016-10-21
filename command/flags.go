@@ -96,12 +96,23 @@ var ClientFlags = []cli.Flag{
 		Value: "http",
 		Usage: "The protocol of the traffic over the tunnel ('http', 'https', 'tcp', 'http+https')",
 	},
-
 	cli.StringFlag{
 		Name:  "server-addr",
 		EnvVar: "XGROK_SERVER_ADDR",
 		Usage: "The xgrok server address to connet with (default: '127.0.0.1:4443').",
 	},
+	cli.StringFlag{
+		Name:  "inspect-addr",
+		EnvVar: "XGROK_INSPECT_ADDR",
+		Usage: "The client inspect address (default: '127.0.0.1:4040').",
+	},
+	cli.BoolFlag{
+		Name:  "insecure-skip-verify",
+		EnvVar: "XGROK_INSECURE_SKIP_VERIFY",
+		Usage: "TLS accepts any certificate. This should be used only for testing.",
+	},
+
+	// InsecureSkipVerify
 }
 
 
@@ -114,6 +125,8 @@ func LoadClientOptions(ctx *cli.Context) *client.Options {
 		Hostname: ctx.String("hostname"),
 		Protocol: ctx.String("proto"),
 		ServerAddr: ctx.String("server-addr"),
+		InspectAddr: ctx.String("inspect-addr"),
+		InsecureSkipVerify: ctx.Bool("insecure-skip-verify"),
 		Args: []string{},
 	}
 

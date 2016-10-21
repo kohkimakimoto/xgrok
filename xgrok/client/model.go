@@ -113,11 +113,12 @@ func newClientModel(config *Configuration, ctl mvc.Controller) *ClientModel {
 	//		panic(err)
 	//	}
 	//}
+
 	m.tlsConfig = &tls.Config{}
+	m.tlsConfig.InsecureSkipVerify = config.InsecureSkipVerify
 
 	// configure TLS SNI
 	m.tlsConfig.ServerName = serverName(m.serverAddr)
-	m.tlsConfig.InsecureSkipVerify = useInsecureSkipVerify()
 
 	return m
 }
@@ -264,9 +265,15 @@ func (c *ClientModel) control() {
 	c.serverVersion = authResp.MmVersion
 	c.Info("Authenticated with server, client id: %v", c.id)
 	c.update()
-	if err = SaveAuthToken(c.configPath, c.authToken); err != nil {
-		c.Error("Failed to save auth token: %v", err)
-	}
+
+	// MEMO: (kohkimakimoto)
+	//   I think that authToken is not used in the OSS product.
+    //   And overriding a configuration file in the process causes unpredictable side effect.
+	//   Therefore I commented out the below code.
+
+	//if err = SaveAuthToken(c.configPath, c.authToken); err != nil {
+	//	c.Error("Failed to save auth token: %v", err)
+	//}
 
 	// request tunnels
 	reqIdToTunnelConfig := make(map[string]*TunnelConfiguration)

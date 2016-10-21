@@ -9,6 +9,8 @@ type Options struct {
 	Hostname  string
 	Protocol  string
 	ServerAddr string
+	InspectAddr string
+	InsecureSkipVerify bool
 	Subdomain string
 	Command   string
 	Args      []string

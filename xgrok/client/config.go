@@ -17,7 +17,10 @@ type Configuration struct {
 	HttpProxy          string                          `yaml:"http_proxy,omitempty"`
 	ServerAddr         string                          `yaml:"server_addr,omitempty"`
 	InspectAddr        string                          `yaml:"inspect_addr,omitempty"`
-	TrustHostRootCerts bool                            `yaml:"trust_host_root_certs,omitempty"`
+	// I implemented xgrok to be used for self hosting. It should not use embedded crt file as a original 'ngrok'.
+	// So it always uses host root cert.
+	// TrustHostRootCerts bool                            `yaml:"trust_host_root_certs,omitempty"`
+	InsecureSkipVerify bool `yaml:"insecure_skip_verify,omitempty"`
 	AuthToken          string                          `yaml:"auth_token,omitempty"`
 	Tunnels            map[string]*TunnelConfiguration `yaml:"tunnels,omitempty"`
 	LogTo              string                          `yaml:"-"`
@@ -58,7 +61,7 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 			return
 		}
 
-		//// try to parse the old .xgrok format for backwards compatibility
+		//// try to parse the old .ngrok format for backwards compatibility
 		//matched := false
 		//content := strings.TrimSpace(string(configBuf))
 		//if matched, err = regexp.MatchString("^[0-9a-zA-Z_\\-!]+$", content); err != nil {
@@ -78,7 +81,11 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	}
 
 	if config.InspectAddr == "" {
-		config.InspectAddr = defaultInspectAddr
+		if opts.InspectAddr == "" {
+			config.InspectAddr = defaultInspectAddr
+		} else {
+			config.InspectAddr = opts.InspectAddr
+		}
 	}
 
 	if config.HttpProxy == "" {
@@ -140,6 +147,9 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	// override configuration with command-line options
 	config.LogTo = opts.Logto
 	config.Path = configPath
+	if opts.InsecureSkipVerify {
+		config.InsecureSkipVerify = opts.InsecureSkipVerify
+	}
 	if opts.Authtoken != "" {
 		config.AuthToken = opts.Authtoken
 	}
