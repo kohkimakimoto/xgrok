@@ -9,7 +9,7 @@ var StartCommand = cli.Command{
 	Name:      "start",
 	Usage:     "Start tunnels by name from config file",
 	Action:    startAction,
-	Flags:     ClientFlags,
+	Flags:     ClientStartFlags,
 	ArgsUsage: "[<tunnel...>]",
 	Description: `Start tunnels by name from config file.
 

@@ -2,6 +2,7 @@ package command
 
 import (
 	"github.com/kohkimakimoto/xgrok/xgrok/client"
+	"github.com/kohkimakimoto/xgrok/xgrok"
 	"github.com/urfave/cli"
 	"os"
 	"fmt"
@@ -30,8 +31,8 @@ func initAction(ctx *cli.Context) error {
 }
 
 var configContent = `
-server_addr:           "localhost:4443"
-inspect_addr:          "localhost:4040"
+server_addr:           "` + xgrok.DefaultServerAddr + `"
+inspect_addr:          "` + xgrok.DefaultInspectAddr + `"
 insecure_skip_verify:  true
 tunnels:
   foo:

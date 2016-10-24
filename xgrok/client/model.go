@@ -22,8 +22,7 @@ import (
 
 const (
 	//defaultServerAddr   = "xgrokd.xgrok.com:443"
-	defaultServerAddr   = "127.0.0.1:4443"
-	defaultInspectAddr  = "127.0.0.1:4040"
+	// defaultInspectAddr  = "127.0.0.1:4040"
 	pingInterval        = 20 * time.Second
 	maxPongLatency      = 15 * time.Second
 	updateCheckInterval = 6 * time.Hour

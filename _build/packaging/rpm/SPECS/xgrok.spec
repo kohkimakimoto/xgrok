@@ -1,12 +1,7 @@
 Name:           %{_product_name}
 Version:        %{_product_version}
 
-%if 0%{?rhel} >= 5
-Release:        1.el%{?rhel}
-%else
-Release:        1%{?dist}
-%endif
-
+Release:        1.el%{_rhel_version}
 Summary:        Introspected tunnels to localhost.
 Group:          Development/Tools
 License:        Apache License, Version 2.0
@@ -17,6 +12,12 @@ Source3:        %{name}.init
 Source4:        %{name}.config.yml
 Source5:        %{name}.logrotate
 BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+
+%if 0%{?fedora} >= 14 || 0%{?rhel} >= 7
+BuildRequires:  systemd-units
+Requires:       systemd
+%endif
+Requires(pre): shadow-utils
 
 %description
 Introspected tunnels to localhost.
@@ -34,8 +35,14 @@ mkdir -p %{buildroot}/%{_sysconfdir}/%{name}
 cp %{SOURCE4} %{buildroot}/%{_sysconfdir}/%{name}/%{name}.yml
 cp %{SOURCE5} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 mkdir -p %{buildroot}/var/log/%{name}
+
+%if 0%{?fedora} >= 14 || 0%{?rhel} >= 7
+mkdir -p %{buildroot}/%{_unitdir}
+cp %{SOURCE2} %{buildroot}/%{_unitdir}/
+%else
 mkdir -p %{buildroot}/%{_initrddir}
 cp %{SOURCE3} %{buildroot}/%{_initrddir}/xgrok
+%endif
 
 %pre
 getent group xgrok >/dev/null || groupadd -r xgrok
@@ -44,6 +51,17 @@ getent passwd xgrok >/dev/null || \
     -c "xgrok user" xgrok
 exit 0
 
+
+%if 0%{?fedora} >= 14 || 0%{?rhel} >= 7
+%post
+%systemd_post %{name}.service
+
+%preun
+%systemd_preun %{name}.service
+
+%postun
+%systemd_postun_with_restart %{name}.service
+%else
 %post
 /sbin/chkconfig --add %{name}
 
@@ -52,6 +70,7 @@ if [ "$1" = 0 ] ; then
     /sbin/service %{name} stop >/dev/null 2>&1
     /sbin/chkconfig --del %{name}
 fi
+%endif
 
 %clean
 rm -rf %{buildroot}

@@ -34,7 +34,7 @@ cd $HOME
 rpmbuild \
     --define "_product_name ${PRODUCT_NAME}" \
     --define "_product_version ${PRODUCT_VERSION}" \
-    --define  "rhel ${RHEL_VERSION}" \
+    --define "_rhel_version ${RHEL_VERSION}" \
     -ba rpmbuild/SPECS/${PRODUCT_NAME}.spec \
     | indent
 

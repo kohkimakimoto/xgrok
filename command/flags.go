@@ -35,6 +35,10 @@ var ServeFlags = []cli.Flag{
 		Name:  "tls-key",
 		Usage: "Path to a TLS key `file`",
 	},
+	cli.BoolFlag{
+		Name:   "disable-tcp",
+		Usage:  "disable TCP protocol proxy.",
+	},
 	cli.StringFlag{
 		Name:  "log",
 		Value: "stdout",
@@ -56,6 +60,7 @@ func LoadServerOptions(ctx *cli.Context) *server.Options {
 		Domain:     ctx.String("domain"),
 		TlsCrt:     ctx.String("tls-crt"),
 		TlsKey:     ctx.String("tls-key"),
+		DisableTCP: ctx.Bool("disable-tcp"),
 		Logto:      ctx.String("log"),
 		Loglevel:   ctx.String("log-level"),
 	}
@@ -63,7 +68,7 @@ func LoadServerOptions(ctx *cli.Context) *server.Options {
 	return opts
 }
 
-var ClientFlags = []cli.Flag{
+var ClientStartFlags = []cli.Flag{
 	cli.StringFlag{
 		Name:  "config",
 		Usage: "Path to xgrok client configuration `file` (default: $(pwd)/.xgrok.yml).",
@@ -79,6 +84,24 @@ var ClientFlags = []cli.Flag{
 		Usage: "The level of messages to log. One of: DEBUG, INFO, WARNING, ERROR",
 	},
 	cli.StringFlag{
+		Name:   "server-addr, s",
+		EnvVar: "XGROK_SERVER_ADDR",
+		Usage:  "The xgrok server address to connet with.",
+	},
+	cli.StringFlag{
+		Name:   "inspect-addr",
+		EnvVar: "XGROK_INSPECT_ADDR",
+		Usage:  "The client inspect address.",
+	},
+	cli.BoolFlag{
+		Name:   "insecure-skip-verify, i",
+		EnvVar: "XGROK_INSECURE_SKIP_VERIFY",
+		Usage:  "TLS accepts any certificate. This should be used only for testing.",
+	},
+}
+
+var ClientTunnelFlags = append(ClientStartFlags, []cli.Flag{
+	cli.StringFlag{
 		Name:  "subdomain",
 		Usage: "Request a custom subdomain from the xgrok server. (HTTP only)",
 	},
@@ -91,24 +114,9 @@ var ClientFlags = []cli.Flag{
 		Value: "http",
 		Usage: "The protocol of the traffic over the tunnel ('http', 'https', 'tcp', 'http+https')",
 	},
-	cli.StringFlag{
-		Name:   "server-addr, s",
-		EnvVar: "XGROK_SERVER_ADDR",
-		Usage:  "The xgrok server address to connet with (default: '127.0.0.1:4443').",
-	},
-	cli.StringFlag{
-		Name:   "inspect-addr",
-		EnvVar: "XGROK_INSPECT_ADDR",
-		Usage:  "The client inspect address (default: '127.0.0.1:4040').",
-	},
-	cli.BoolFlag{
-		Name:   "insecure-skip-verify, i",
-		EnvVar: "XGROK_INSECURE_SKIP_VERIFY",
-		Usage:  "TLS accepts any certificate. This should be used only for testing.",
-	},
 	// TODO:
 	// authtoken, httpauth is not supported now...
-}
+}...)
 
 func LoadClientOptions(ctx *cli.Context) *client.Options {
 	opts := &client.Options{

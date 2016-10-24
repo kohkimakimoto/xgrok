@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"github.com/kohkimakimoto/xgrok/xgrok"
 )
 
 type Configuration struct {
@@ -73,20 +74,20 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 	}
 
 	// set configuration defaults
-	if config.ServerAddr == "" {
-		if opts.ServerAddr == "" {
-			config.ServerAddr = defaultServerAddr
-		} else {
-			config.ServerAddr = opts.ServerAddr
+	if opts.ServerAddr == "" {
+		if config.ServerAddr == "" {
+			config.ServerAddr = xgrok.DefaultServerAddr
 		}
+	} else {
+		config.ServerAddr = opts.ServerAddr
 	}
 
-	if config.InspectAddr == "" {
-		if opts.InspectAddr == "" {
-			config.InspectAddr = defaultInspectAddr
-		} else {
-			config.InspectAddr = opts.InspectAddr
+	if opts.InspectAddr == "" {
+		if config.InspectAddr == "" {
+			config.InspectAddr = xgrok.DefaultInspectAddr
 		}
+	} else {
+		config.InspectAddr = opts.InspectAddr
 	}
 
 	if config.HttpProxy == "" {

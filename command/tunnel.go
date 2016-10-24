@@ -11,7 +11,7 @@ var TunnelCommand = cli.Command{
 	Name:      "tunnel",
 	Usage:     "Start a tunnel",
 	Action:    tunnelAction,
-	Flags:     ClientFlags,
+	Flags:     ClientTunnelFlags,
 	ArgsUsage: "<port>",
 	Description: `Start a tunnel.
 

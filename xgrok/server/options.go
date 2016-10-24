@@ -7,6 +7,7 @@ type Options struct {
 	Domain     string
 	TlsCrt     string
 	TlsKey     string
+	DisableTCP bool
 	Logto      string
 	Loglevel   string
 	Config     string

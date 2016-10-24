@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+	"errors"
 )
 
 var defaultPortMap = map[string]int{
@@ -105,6 +106,11 @@ func NewTunnel(m *msg.ReqTunnel, ctl *Control) (t *Tunnel, err error) {
 	proto := t.req.Protocol
 	switch proto {
 	case "tcp":
+		if config.DisableTCP {
+			err = errors.New("TCP binding is not permitted by the server configuration")
+			return
+		}
+
 		bindTcp := func(port int) error {
 			if t.listener, err = net.ListenTCP("tcp", &net.TCPAddr{IP: net.ParseIP("0.0.0.0"), Port: port}); err != nil {
 				err = t.ctl.conn.Error("Error binding TCP listener: %v", err)

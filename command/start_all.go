@@ -9,7 +9,7 @@ var StartAllCommand = cli.Command{
 	Name:      "start-all",
 	Usage:     "Start all tunnels defined in config file",
 	Action:    startAllAction,
-	Flags:     ClientFlags,
+	Flags:     ClientStartFlags,
 	ArgsUsage: " ",
 	Description: `Start all tunnels defined in config file.
 
