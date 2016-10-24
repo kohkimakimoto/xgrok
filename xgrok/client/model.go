@@ -71,7 +71,7 @@ func newClientModel(config *Configuration, ctl mvc.Controller) *ClientModel {
 		proxyUrl: config.HttpProxy,
 
 		// auth token
-		authToken: config.AuthToken,
+		authToken: config.Authtoken,
 
 		// connection status
 		connStatus: mvc.ConnConnecting,

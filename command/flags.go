@@ -36,8 +36,8 @@ var ServeFlags = []cli.Flag{
 		Usage: "Path to a TLS key `file`",
 	},
 	cli.BoolFlag{
-		Name:   "disable-tcp",
-		Usage:  "disable TCP protocol proxy.",
+		Name:  "disable-tcp",
+		Usage: "disable TCP protocol proxy.",
 	},
 	cli.StringFlag{
 		Name:  "log",
@@ -98,6 +98,10 @@ var ClientStartFlags = []cli.Flag{
 		EnvVar: "XGROK_INSECURE_SKIP_VERIFY",
 		Usage:  "TLS accepts any certificate. This should be used only for testing.",
 	},
+	cli.StringFlag{
+		Name:  "authtoken",
+		Usage: "Authentication token for identifying an xgrok server account",
+	},
 }
 
 var ClientTunnelFlags = append(ClientStartFlags, []cli.Flag{
@@ -114,8 +118,6 @@ var ClientTunnelFlags = append(ClientStartFlags, []cli.Flag{
 		Value: "http",
 		Usage: "The protocol of the traffic over the tunnel ('http', 'https', 'tcp', 'http+https')",
 	},
-	// TODO:
-	// authtoken, httpauth is not supported now...
 }...)
 
 func LoadClientOptions(ctx *cli.Context) *client.Options {
@@ -128,6 +130,7 @@ func LoadClientOptions(ctx *cli.Context) *client.Options {
 		ServerAddr:         ctx.String("server-addr"),
 		InspectAddr:        ctx.String("inspect-addr"),
 		InsecureSkipVerify: ctx.Bool("insecure-skip-verify"),
+		Authtoken:          ctx.String("authtoken"),
 		Args:               []string{},
 	}
 

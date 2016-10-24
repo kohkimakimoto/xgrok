@@ -101,6 +101,19 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 		return
 	}
 
+	// authenticate user
+	if config.UseAuth {
+		if authMsg.User == "" {
+			failAuth(fmt.Errorf("Token is empty. Try to specify '--auth-token' option."))
+			return
+		}
+
+		if _, ok := config.AuthtokensMap[authMsg.User]; !ok {
+			failAuth(fmt.Errorf("Invalid token: %s", authMsg.User))
+			return
+		}
+	}
+
 	// register the control
 	if replaced := controlRegistry.Add(c.id, c); replaced != nil {
 		replaced.shutdown.WaitComplete()

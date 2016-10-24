@@ -1,6 +1,11 @@
-http_addr:    "0.0.0.0:80"
-https_addr:   "0.0.0.0:443"
-tunnel_addr:  "0.0.0.0:4443"
+http_addr:    "0.0.0.0:9680"
+# https_addr:   "0.0.0.0:9681"
+tunnel_addr:  "0.0.0.0:9690"
+
 domain:       "xgrok-example.com"
 # tls_crt:    "path/to/crt"
 # tls_key:    "path/to/key"
+use_auth:  false
+authtokens:
+    - aaa123abc
+    - bbb456def

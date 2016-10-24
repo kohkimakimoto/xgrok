@@ -23,7 +23,7 @@ func realMain() (status int) {
 	CLI := cli.NewApp()
 	CLI.Name = xgrok.Name
 	CLI.Usage = xgrok.Usage
-	CLI.Version = xgrok.Version
+	CLI.Version = xgrok.Version + " (" + xgrok.CommitHash + ")"
 	CLI.Commands = []cli.Command{
 		command.InitCommand,
 		command.ListCommand,

@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"github.com/kohkimakimoto/xgrok/support/yaml-template"
+	"github.com/kohkimakimoto/xgrok/xgrok"
 	"github.com/kohkimakimoto/xgrok/xgrok/log"
 	"io/ioutil"
 	"net"
@@ -11,18 +12,17 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"github.com/kohkimakimoto/xgrok/xgrok"
 )
 
 type Configuration struct {
-	HttpProxy          string                          `yaml:"http_proxy,omitempty"`
-	ServerAddr         string                          `yaml:"server_addr,omitempty"`
-	InspectAddr        string                          `yaml:"inspect_addr,omitempty"`
+	HttpProxy          string `yaml:"http_proxy,omitempty"`
+	ServerAddr         string `yaml:"server_addr,omitempty"`
+	InspectAddr        string `yaml:"inspect_addr,omitempty"`
 	// I implemented xgrok to be used for self hosting. It should not use embedded crt file as a original 'ngrok'.
 	// So it always uses host root cert.
 	// TrustHostRootCerts bool                            `yaml:"trust_host_root_certs,omitempty"`
 	InsecureSkipVerify bool                            `yaml:"insecure_skip_verify,omitempty"`
-	AuthToken          string                          `yaml:"auth_token,omitempty"`
+	Authtoken          string                          `yaml:"authtoken,omitempty"`
 	Tunnels            map[string]*TunnelConfiguration `yaml:"tunnels,omitempty"`
 	LogTo              string                          `yaml:"-"`
 	Path               string                          `yaml:"-"`
@@ -153,7 +153,7 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 		config.InsecureSkipVerify = opts.InsecureSkipVerify
 	}
 	if opts.Authtoken != "" {
-		config.AuthToken = opts.Authtoken
+		config.Authtoken = opts.Authtoken
 	}
 
 	switch opts.Command {

@@ -6,10 +6,10 @@ import (
 )
 
 var ListCommand = cli.Command{
-	Name:      "list",
-	Usage:     " List tunnel names from config file",
-	Action:    listAction,
-	Flags:     []cli.Flag{
+	Name:   "list",
+	Usage:  " List tunnel names from config file",
+	Action: listAction,
+	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "config",
 			Usage: "Path to xgrok client configuration `file` (default: $(pwd)/.xgrok.yml).",

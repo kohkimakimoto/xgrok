@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/kohkimakimoto/xgrok/xgrok/conn"
 	"github.com/kohkimakimoto/xgrok/xgrok/log"
@@ -14,7 +15,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
-	"errors"
 )
 
 var defaultPortMap = map[string]int{

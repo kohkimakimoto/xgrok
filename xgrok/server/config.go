@@ -1,28 +1,32 @@
 package server
 
 import (
+	"errors"
 	"github.com/kohkimakimoto/xgrok/support/yaml-template"
 	"github.com/kohkimakimoto/xgrok/xgrok"
 	"io/ioutil"
-	"errors"
 )
 
 type Configuration struct {
-	TunnelAddr string `yaml:"tunnel_addr,omitempty"`
-	HttpAddr   string `yaml:"http_addr,omitempty"`
-	HttpsAddr  string `yaml:"https_addr,omitempty"`
-	Domain     string `yaml:"domain,omitempty"`
-	TlsCrt     string `yaml:"tls_crt,omitempty"`
-	TlsKey     string `yaml:"tls_key,omitempty"`
-	DisableTCP bool   `yaml:"disable_tcp,omitempty"`
-	Logto      string `yaml:"-"`
-	Loglevel   string `yaml:"-"`
+	TunnelAddr    string            `yaml:"tunnel_addr,omitempty"`
+	HttpAddr      string            `yaml:"http_addr,omitempty"`
+	HttpsAddr     string            `yaml:"https_addr,omitempty"`
+	Domain        string            `yaml:"domain,omitempty"`
+	TlsCrt        string            `yaml:"tls_crt,omitempty"`
+	TlsKey        string            `yaml:"tls_key,omitempty"`
+	DisableTCP    bool              `yaml:"disable_tcp,omitempty"`
+	UseAuth       bool              `yaml:"use_auth,omitempty"`
+	Authtokens    []string          `yaml:"authtokens,omitempty"`
+	AuthtokensMap map[string]bool    `yaml:"-"`
+	Logto         string            `yaml:"-"`
+	Loglevel      string            `yaml:"-"`
 }
 
 func LoadConfiguration(opts *Options) (*Configuration, error) {
 	config := &Configuration{
 		TunnelAddr: xgrok.DefaultTunnelAddr,
 		HttpAddr:   xgrok.DefaultHttpAddr,
+		AuthtokensMap: map[string]bool{},
 	}
 
 	configPath := opts.Config
@@ -71,6 +75,12 @@ func LoadConfiguration(opts *Options) (*Configuration, error) {
 
 	if opts.DisableTCP {
 		config.DisableTCP = true
+	}
+
+	if config.Authtokens != nil && len(config.Authtokens) > 0{
+		for _, t := range config.Authtokens {
+			config.AuthtokensMap[t] = true
+		}
 	}
 
 	return config, nil

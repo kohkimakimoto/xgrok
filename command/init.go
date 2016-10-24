@@ -1,12 +1,12 @@
 package command
 
 import (
-	"github.com/kohkimakimoto/xgrok/xgrok/client"
-	"github.com/kohkimakimoto/xgrok/xgrok"
-	"github.com/urfave/cli"
-	"os"
 	"fmt"
+	"github.com/kohkimakimoto/xgrok/xgrok"
+	"github.com/kohkimakimoto/xgrok/xgrok/client"
+	"github.com/urfave/cli"
 	"io/ioutil"
+	"os"
 )
 
 var InitCommand = cli.Command{

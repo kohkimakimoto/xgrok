@@ -8,7 +8,7 @@ User=xgrok
 Group=xgrok
 EnvironmentFile=-/etc/sysconfig/xgrok
 ExecStart=/usr/bin/xgrok serve $OPTIONS
-KillSignal=SIGINT
+KillSignal=SIGTERM
 
 [Install]
 WantedBy=multi-user.target
