@@ -18,6 +18,10 @@ type Configuration struct {
 	UseAuth       bool              `yaml:"use_auth,omitempty"`
 	Authtokens    []string          `yaml:"authtokens,omitempty"`
 	AuthtokensMap map[string]bool    `yaml:"-"`
+	PreRegister []string           `yaml:"pre_register,omitempty"`
+	PostRegister []string           `yaml:"post_register,omitempty"`
+	PreShutdown []string           `yaml:"pre_shutdown,omitempty"`
+	PostShutdown []string           `yaml:"post_shutdown,omitempty"`
 	Logto         string            `yaml:"-"`
 	Loglevel      string            `yaml:"-"`
 }

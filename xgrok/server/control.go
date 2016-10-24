@@ -10,6 +10,9 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
+	"os"
+	"os/exec"
+	"runtime"
 )
 
 const (
@@ -144,6 +147,11 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		tunnelReq := *rawTunnelReq
 		tunnelReq.Protocol = proto
 
+		// hook
+		if err := c.runHookCommands(config.PreRegister, nil); err != nil {
+			panic(err)
+		}
+
 		c.conn.Debug("Registering new tunnel")
 		t, err := NewTunnel(&tunnelReq, c)
 		if err != nil {
@@ -167,6 +175,11 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		}
 
 		rawTunnelReq.Hostname = strings.Replace(t.url, proto+"://", "", 1)
+
+		// hook
+		if err := c.runHookCommands(config.PostRegister, t); err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -291,7 +304,17 @@ func (c *Control) stopper() {
 
 	// shutdown all of the tunnels
 	for _, t := range c.tunnels {
+		// hook
+		if err := c.runHookCommands(config.PreShutdown, t); err != nil {
+			panic(err)
+		}
+
 		t.Shutdown()
+
+		// hook
+		if err := c.runHookCommands(config.PostShutdown, t); err != nil {
+			panic(err)
+		}
 	}
 
 	// shutdown all of the proxy connections
@@ -366,4 +389,39 @@ func (c *Control) Replaced(replacement *Control) {
 
 	// tell the old one to shutdown
 	c.shutdown.Begin()
+}
+
+func (c *Control) runHookCommands(commands []string, t *Tunnel) error {
+	if commands == nil || len(commands) == 0 {
+		return nil
+	}
+
+	script := strings.Join(commands, " && ")
+
+	var shell, flag string
+	if runtime.GOOS == "windows" {
+		shell = "cmd"
+		flag = "/C"
+	} else {
+		shell = "/bin/sh"
+		flag = "-c"
+	}
+	cmd := exec.Command(shell, flag, script)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+
+	var env []string
+	if t != nil {
+		env = []string{
+			`XGROK_TUNNEL_URL=` + t.url,
+		}
+	} else {
+		env = []string{}
+	}
+
+	env = append(os.Environ(), env...)
+	cmd.Env = env
+
+	return cmd.Run()
 }
