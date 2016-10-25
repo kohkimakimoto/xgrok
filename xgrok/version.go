@@ -2,7 +2,7 @@ package xgrok
 
 var (
 	Name       = "xgrok"
-	Version    = "0.30.0"
+	Version    = "unknown"
 	CommitHash = "unknown"
 	Usage      = "Introspected tunnels to localhost."
 )

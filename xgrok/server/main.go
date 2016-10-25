@@ -11,6 +11,8 @@ import (
 	"os"
 	"runtime/debug"
 	"time"
+	"os/signal"
+	"syscall"
 )
 
 const (
@@ -63,11 +65,9 @@ func tunnelListener(addr string, tlsConfig *tls.Config) {
 		panic(err)
 	}
 
-	log.Info("Listening for control and proxy connections on %s", listener.Addr.String())
-	if tlsConfig == nil {
-		log.Warn("The control and proxy connections are not TLS connection. You have a risk about secure netwoking.")
-	}
+	go handleSignals()
 
+	log.Info("Listening for control and proxy connections on %s", listener.Addr.String())
 	for c := range listener.Conns {
 		go func(tunnelConn conn.Conn) {
 			// don't crash on panics
@@ -92,14 +92,49 @@ func tunnelListener(addr string, tlsConfig *tls.Config) {
 			switch m := rawMsg.(type) {
 			case *msg.Auth:
 				NewControl(tunnelConn, m)
-
 			case *msg.RegProxy:
 				NewProxy(tunnelConn, m)
-
 			default:
 				tunnelConn.Close()
 			}
 		}(c)
+	}
+}
+
+func handleSignals() {
+	sigChan := make(chan os.Signal)
+	signal.Notify(sigChan,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
+	for {
+		sig := <- sigChan
+		switch sig {
+		case syscall.SIGINT:
+			log.Info("Received SIGINT")
+			for _, t := range tunnelRegistry.tunnels {
+				t.Shutdown()
+			}
+
+			//for _, ctl := range controlRegistry.controls {
+			//	ctl.shutdown.Begin()
+			//	ctl.shutdown.WaitComplete()
+			//}
+
+			os.Exit(0)
+		case syscall.SIGTERM:
+			log.Info("Received SIGTERM")
+			for _, t := range tunnelRegistry.tunnels {
+				t.Shutdown()
+			}
+
+			//for _, ctl := range controlRegistry.controls {
+			//	ctl.shutdown.Begin()
+			//	ctl.shutdown.WaitComplete()
+			//}
+
+			os.Exit(0)
+		}
 	}
 }
 

@@ -16,14 +16,14 @@ authtokens:
     - aaa123abc
     - bbb456def
 
-# pre_register:
+# pre_register_tunnel:
 #     - echo foo
 
-# post_register:
+# post_register_tunnel:
 #     - echo $XGROK_TUNNEL_URL
 
-# pre_shutdown:
+# pre_shutdown_tunnel:
 #     - echo $XGROK_TUNNEL_URL
 
-# post_shutdown:
+# post_shutdown_tunnel:
 #     - echo $XGROK_TUNNEL_URL

@@ -9,21 +9,21 @@ import (
 
 type Configuration struct {
 	TunnelAddr    string            `yaml:"tunnel_addr,omitempty"`
-	HttpAddr      string            `yaml:"http_addr,omitempty"`
-	HttpsAddr     string            `yaml:"https_addr,omitempty"`
-	Domain        string            `yaml:"domain,omitempty"`
-	TlsCrt        string            `yaml:"tls_crt,omitempty"`
-	TlsKey        string            `yaml:"tls_key,omitempty"`
-	DisableTCP    bool              `yaml:"disable_tcp,omitempty"`
-	UseAuth       bool              `yaml:"use_auth,omitempty"`
-	Authtokens    []string          `yaml:"authtokens,omitempty"`
-	AuthtokensMap map[string]bool    `yaml:"-"`
-	PreRegister []string           `yaml:"pre_register,omitempty"`
-	PostRegister []string           `yaml:"post_register,omitempty"`
-	PreShutdown []string           `yaml:"pre_shutdown,omitempty"`
-	PostShutdown []string           `yaml:"post_shutdown,omitempty"`
-	Logto         string            `yaml:"-"`
-	Loglevel      string            `yaml:"-"`
+	HttpAddr          string            `yaml:"http_addr,omitempty"`
+	HttpsAddr         string            `yaml:"https_addr,omitempty"`
+	Domain             string            `yaml:"domain,omitempty"`
+	TlsCrt             string            `yaml:"tls_crt,omitempty"`
+	TlsKey             string            `yaml:"tls_key,omitempty"`
+	DisableTCP         bool              `yaml:"disable_tcp,omitempty"`
+	UseAuth            bool              `yaml:"use_auth,omitempty"`
+	Authtokens         []string          `yaml:"authtokens,omitempty"`
+	AuthtokensMap      map[string]bool    `yaml:"-"`
+	PreRegisterTunnel  []string           `yaml:"pre_register_tunnel,omitempty"`
+	PostRegisterTunnel []string           `yaml:"post_register_tunnel,omitempty"`
+	PreShutdownTunnel  []string           `yaml:"pre_shutdown_tunnel,omitempty"`
+	PostShutdownTunnel []string           `yaml:"post_shutdown_tunnel,omitempty"`
+	Logto              string            `yaml:"-"`
+	Loglevel           string            `yaml:"-"`
 }
 
 func LoadConfiguration(opts *Options) (*Configuration, error) {

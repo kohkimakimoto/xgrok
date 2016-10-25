@@ -148,7 +148,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		tunnelReq.Protocol = proto
 
 		// hook
-		if err := c.runHookCommands(config.PreRegister, nil); err != nil {
+		if err := runHookCommands(config.PreRegisterTunnel, nil); err != nil {
 			panic(err)
 		}
 
@@ -177,7 +177,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		rawTunnelReq.Hostname = strings.Replace(t.url, proto+"://", "", 1)
 
 		// hook
-		if err := c.runHookCommands(config.PostRegister, t); err != nil {
+		if err := runHookCommands(config.PostRegisterTunnel, t); err != nil {
 			panic(err)
 		}
 	}
@@ -304,17 +304,7 @@ func (c *Control) stopper() {
 
 	// shutdown all of the tunnels
 	for _, t := range c.tunnels {
-		// hook
-		if err := c.runHookCommands(config.PreShutdown, t); err != nil {
-			panic(err)
-		}
-
 		t.Shutdown()
-
-		// hook
-		if err := c.runHookCommands(config.PostShutdown, t); err != nil {
-			panic(err)
-		}
 	}
 
 	// shutdown all of the proxy connections
@@ -391,7 +381,7 @@ func (c *Control) Replaced(replacement *Control) {
 	c.shutdown.Begin()
 }
 
-func (c *Control) runHookCommands(commands []string, t *Tunnel) error {
+func runHookCommands(commands []string, t *Tunnel) error {
 	if commands == nil || len(commands) == 0 {
 		return nil
 	}

@@ -195,6 +195,11 @@ func NewTunnel(m *msg.ReqTunnel, ctl *Control) (t *Tunnel, err error) {
 func (t *Tunnel) Shutdown() {
 	t.Info("Shutting down")
 
+	// hook
+	if err := runHookCommands(config.PreShutdownTunnel, t); err != nil {
+		panic(err)
+	}
+
 	// mark that we're shutting down
 	atomic.StoreInt32(&t.closing, 1)
 
@@ -212,6 +217,11 @@ func (t *Tunnel) Shutdown() {
 	// t.ctl.stoptunnel <- t
 
 	metrics.CloseTunnel(t)
+
+	// hook
+	if err := runHookCommands(config.PostShutdownTunnel, t); err != nil {
+		panic(err)
+	}
 }
 
 func (t *Tunnel) Id() string {
