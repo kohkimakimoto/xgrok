@@ -103,7 +103,7 @@ func tunnelListener(addr string, tlsConfig *tls.Config) {
 	}
 }
 
-func handleSignals() {
+func waitHandlingSignals() {
 	sigChan := make(chan os.Signal)
 	signal.Notify(sigChan,
 		syscall.SIGINT,
@@ -131,7 +131,7 @@ func handleSignals() {
 }
 
 func wait() {
-	handleSignals()
+	waitHandlingSignals()
 
 	// workaround: wait to output log
 	// Sometimes the logger does not output some log messages before the process exits.

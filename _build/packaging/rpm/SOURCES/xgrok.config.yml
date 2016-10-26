@@ -10,6 +10,8 @@ domain:       "xgrok-example.com"
 
 # tls_key:    "path/to/key"
 
+disable_tcp: true
+
 use_auth:  false
 
 authtokens:

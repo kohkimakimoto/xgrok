@@ -75,7 +75,7 @@ func (v *TermView) draw() {
 	case mvc.UpdateReady:
 		updateMsg = "xgrok has updated: restart xgrok for the new version"
 	case mvc.UpdateAvailable:
-		updateMsg = "new version available at https://xgrok.com"
+		updateMsg = "new version available at https://github.com/kohkimakimoto/xgrok"
 	default:
 		pct := float64(updateStatus) / 100.0
 		const barLength = 25
@@ -107,6 +107,7 @@ func (v *TermView) draw() {
 		v.Printf(0, i, "%-30s%s -> %s", "Forwarding", t.PublicUrl, t.LocalAddr)
 		i++
 	}
+
 	v.Printf(0, i+0, "%-30s%s", "Web Interface", v.ctl.GetWebInspectAddr())
 
 	connMeter, connTimer := state.GetConnectionMetrics()
