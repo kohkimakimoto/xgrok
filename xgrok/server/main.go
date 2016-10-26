@@ -53,6 +53,10 @@ func NewProxy(pxyConn conn.Conn, regPxy *msg.RegProxy) {
 	ctl.RegisterProxy(pxyConn)
 }
 
+func startTunnelListener(addr string, tlsConfig *tls.Config) {
+	go tunnelListener(addr, tlsConfig)
+}
+
 // Listen for incoming control and proxy connections
 // We listen for incoming control and proxy connections on the same port
 // for ease of deployment. The hope is that by running on port 443, using
@@ -64,8 +68,6 @@ func tunnelListener(addr string, tlsConfig *tls.Config) {
 	if err != nil {
 		panic(err)
 	}
-
-	go handleSignals()
 
 	log.Info("Listening for control and proxy connections on %s", listener.Addr.String())
 	for c := range listener.Conns {
@@ -116,26 +118,24 @@ func handleSignals() {
 				t.Shutdown()
 			}
 
-			//for _, ctl := range controlRegistry.controls {
-			//	ctl.shutdown.Begin()
-			//	ctl.shutdown.WaitComplete()
-			//}
-
-			os.Exit(0)
+			return
 		case syscall.SIGTERM:
 			log.Info("Received SIGTERM")
 			for _, t := range tunnelRegistry.tunnels {
 				t.Shutdown()
 			}
 
-			//for _, ctl := range controlRegistry.controls {
-			//	ctl.shutdown.Begin()
-			//	ctl.shutdown.WaitComplete()
-			//}
-
-			os.Exit(0)
+			return
 		}
 	}
+}
+
+func wait() {
+	handleSignals()
+
+	// workaround: wait to output log
+	// Sometimes the logger does not output some log messages before the process exits.
+	time.Sleep(1 * time.Millisecond)
 }
 
 func Main(opts *Options) {
@@ -184,5 +184,6 @@ func Main(opts *Options) {
 		listeners["https"] = startHttpListener(config.HttpsAddr, tlsConfig)
 	}
 
-	tunnelListener(config.TunnelAddr, tlsConfig)
+	startTunnelListener(config.TunnelAddr, tlsConfig)
+	wait()
 }
