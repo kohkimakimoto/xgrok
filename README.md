@@ -8,7 +8,7 @@ xgrok is based on a fork of [ngrok](https://github.com/inconshreveable/ngrok) v1
 
 ## Installation
 
-WIP...
+[Download latest version](https://github.com/kohkimakimoto/essh/releases/latest)
 
 ## Usage
 

@@ -49,14 +49,6 @@ done
 echo "    Removing tarminated containers..."
 docker rm `docker ps -a -q -f status=exited` | indent
 
-# vagrant status | grep running > /dev/null &&:
-# if [ $? -eq 0 ]; then
-#     vagrant provision | indent
-# else
-#     vagrant up --provision | indent
-# fi
-# vagrant halt
-
 cd "$DIR"
 
 echo "--> Results:"
