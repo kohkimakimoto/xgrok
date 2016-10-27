@@ -52,15 +52,15 @@ type Auth struct {
 // that is used to associate and authenticate future
 // proxy connections via the same field in RegProxy messages.
 type AuthResp struct {
-	Version   string
-	MmVersion string
-	ClientId  string
-	Error     string
+	Version     string
+	MmVersion   string
+	ClientId    string
+	Error       string
 	CustomProps []CustomProp
 }
 
 type CustomProp struct {
-	Key string
+	Key   string
 	Value string
 }
 
@@ -89,10 +89,10 @@ type ReqTunnel struct {
 // ReqTunnel. (ex. A client opens an https tunnel and the server
 // chooses to open an http tunnel of the same name as well)
 type NewTunnel struct {
-	ReqId    string
-	Url      string
-	Protocol string
-	Error    string
+	ReqId       string
+	Url         string
+	Protocol    string
+	Error       string
 	CustomProps []CustomProp
 }
 

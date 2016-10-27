@@ -19,7 +19,7 @@ type Configuration struct {
 	Loglevel   string `gluamapper:"-"`
 
 	UserAuth UserAuthConfiguration `gluamapper:"-"`
-	Hooks HooksConfiguration `gluamapper:"-"`
+	Hooks    HooksConfiguration    `gluamapper:"-"`
 }
 
 type UserAuthConfiguration struct {
@@ -40,8 +40,8 @@ func LoadConfiguration(opts *Options, L *lua.LState) (*Configuration, error) {
 	config := &Configuration{
 		TunnelAddr: xgrok.DefaultTunnelAddr,
 		HttpAddr:   xgrok.DefaultHttpAddr,
-		UserAuth:  UserAuthConfiguration{
-			Enable: false,
+		UserAuth: UserAuthConfiguration{
+			Enable:    false,
 			Tokens:    []string{},
 			TokensMap: map[string]bool{},
 		},
@@ -71,7 +71,6 @@ func LoadConfiguration(opts *Options, L *lua.LState) (*Configuration, error) {
 		}
 
 		config.UserAuth = userAuthConfig
-
 
 		hooksConfig := config.Hooks
 

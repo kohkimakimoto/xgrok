@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/kohkimakimoto/xgrok/xgrok/conn"
+	log "github.com/kohkimakimoto/xgrok/xgrok/log"
 	"github.com/kohkimakimoto/xgrok/xgrok/msg"
 	"github.com/kohkimakimoto/xgrok/xgrok/util"
 	"github.com/kohkimakimoto/xgrok/xgrok/version"
@@ -11,7 +12,6 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
-	log "github.com/kohkimakimoto/xgrok/xgrok/log"
 )
 
 const (
@@ -126,9 +126,9 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 
 	// Respond to authentication
 	authResp := &msg.AuthResp{
-		Version:   version.Proto,
-		MmVersion: version.MajorMinor(),
-		ClientId:  c.id,
+		Version:     version.Proto,
+		MmVersion:   version.MajorMinor(),
+		ClientId:    c.id,
 		CustomProps: []msg.CustomProp{},
 	}
 
@@ -425,4 +425,3 @@ func runHookFilterWithAuthResp(fn *lua.LFunction, authResp *msg.AuthResp) error 
 
 	return err
 }
-

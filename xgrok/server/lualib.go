@@ -6,12 +6,12 @@ import (
 	"github.com/kohkimakimoto/gluafs"
 	"github.com/kohkimakimoto/gluatemplate"
 	"github.com/kohkimakimoto/gluayaml"
+	"github.com/kohkimakimoto/xgrok/xgrok/msg"
 	gluajson "github.com/layeh/gopher-json"
 	"github.com/otm/gluash"
 	"github.com/yuin/gluare"
 	"github.com/yuin/gopher-lua"
 	"net/http"
-	"github.com/kohkimakimoto/xgrok/xgrok/msg"
 )
 
 func initLuaState(L *lua.LState) {
@@ -44,7 +44,6 @@ func registerTunnelClass(L *lua.LState) {
 	mt.RawSetString("__index", L.NewFunction(tunnelIndex))
 	mt.RawSetString("__newindex", L.NewFunction(tunnelNewindex))
 }
-
 
 func newLTunnel(L *lua.LState, tunnel *Tunnel) *lua.LUserData {
 	ud := L.NewUserData()
@@ -84,7 +83,6 @@ func tunnelNewindex(L *lua.LState) int {
 
 	return 0
 }
-
 
 const LAuthRespClass = "AuthResp*"
 
@@ -126,7 +124,7 @@ func authRespIndex(L *lua.LState) int {
 			value := L.CheckString(2)
 
 			prop := msg.CustomProp{
-				Key: key,
+				Key:   key,
 				Value: value,
 			}
 
