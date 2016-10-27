@@ -5,7 +5,6 @@ import (
 	"github.com/kohkimakimoto/xgrok/xgrok"
 	"github.com/yuin/gluamapper"
 	"github.com/yuin/gopher-lua"
-	"fmt"
 )
 
 type Configuration struct {
@@ -20,17 +19,20 @@ type Configuration struct {
 	Loglevel   string `gluamapper:"-"`
 
 	UserAuth UserAuthConfiguration `gluamapper:"-"`
-
-	PreRegisterTunnel  []string
-	PostRegisterTunnel []string
-	PreShutdownTunnel  []string
-	PostShutdownTunnel []string
+	Hooks HooksConfiguration `gluamapper:"-"`
 }
 
 type UserAuthConfiguration struct {
 	Enable    bool
 	Tokens    []string
 	TokensMap map[string]bool `gluamapper:"-"`
+}
+
+type HooksConfiguration struct {
+	PreRegisterTunnel  *lua.LFunction
+	PostRegisterTunnel *lua.LFunction
+	PreShutdownTunnel  *lua.LFunction
+	PostShutdownTunnel *lua.LFunction
 }
 
 func LoadConfiguration(opts *Options, L *lua.LState) (*Configuration, error) {
@@ -42,6 +44,7 @@ func LoadConfiguration(opts *Options, L *lua.LState) (*Configuration, error) {
 			Tokens:    []string{},
 			TokensMap: map[string]bool{},
 		},
+		Hooks: HooksConfiguration{},
 	}
 
 	configPath := opts.Config
@@ -67,6 +70,15 @@ func LoadConfiguration(opts *Options, L *lua.LState) (*Configuration, error) {
 		}
 
 		config.UserAuth = userAuthConfig
+
+
+		hooksConfig := config.Hooks
+
+		if err := gluamapper.Map(L.GetGlobal("hooks").(*lua.LTable), &hooksConfig); err != nil {
+			return nil, err
+		}
+
+		config.Hooks = hooksConfig
 	}
 
 	// override configuration with command-line options

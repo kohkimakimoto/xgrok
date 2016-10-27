@@ -14,6 +14,7 @@ import (
 	"runtime/debug"
 	"syscall"
 	"time"
+	"sync"
 )
 
 const (
@@ -30,6 +31,7 @@ var (
 	// XXX: kill these global variables - they're only used in tunnel.go for constructing forwarding URLs
 	config    *Configuration
 	listeners map[string]*conn.Listener
+	hooksMutex *sync.Mutex
 )
 
 func NewProxy(pxyConn conn.Conn, regPxy *msg.RegProxy) {
@@ -147,6 +149,8 @@ func Main(opts *Options) {
 	LState = lua.NewState()
 	defer LState.Close()
 	initLuaState(LState)
+
+	hooksMutex = new(sync.Mutex)
 
 	// read configuration file
 	c, err := LoadConfiguration(opts, LState)

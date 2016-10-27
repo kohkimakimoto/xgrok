@@ -33,3 +33,23 @@ user_auth.tokens = {
     "aaa123abc",
     "bbb456def",
 }
+
+-- #####################################################################
+-- hooks is a table that contains hooks configurations.
+-- #####################################################################
+
+-- hooks.pre_register_tunnel = function()
+--
+-- end
+--
+-- hooks.post_register_tunnel = function(tunnel)
+--     print("register_tunnel: " .. tunnel.url)
+-- end
+--
+-- hooks.pre_shutdown_tunnel = function(tunnel)
+--
+-- end
+--
+-- hooks.post_shutdown_tunnel = function(tunnel)
+--
+-- end

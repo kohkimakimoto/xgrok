@@ -6,10 +6,8 @@ import (
 	"github.com/kohkimakimoto/xgrok/xgrok/msg"
 	"github.com/kohkimakimoto/xgrok/xgrok/util"
 	"github.com/kohkimakimoto/xgrok/xgrok/version"
+	"github.com/yuin/gopher-lua"
 	"io"
-	"os"
-	"os/exec"
-	"runtime"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -148,7 +146,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		tunnelReq.Protocol = proto
 
 		// hook
-		if err := runHookCommands(config.PreRegisterTunnel, nil); err != nil {
+		if err := runTunnelHook(config.Hooks.PreRegisterTunnel, nil); err != nil {
 			panic(err)
 		}
 
@@ -177,7 +175,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		rawTunnelReq.Hostname = strings.Replace(t.url, proto+"://", "", 1)
 
 		// hook
-		if err := runHookCommands(config.PostRegisterTunnel, t); err != nil {
+		if err := runTunnelHook(config.Hooks.PostRegisterTunnel, t); err != nil {
 			panic(err)
 		}
 	}
@@ -381,37 +379,20 @@ func (c *Control) Replaced(replacement *Control) {
 	c.shutdown.Begin()
 }
 
-func runHookCommands(commands []string, t *Tunnel) error {
-	if commands == nil || len(commands) == 0 {
-		return nil
-	}
+func runTunnelHook(fn *lua.LFunction, t *Tunnel) error {
+	hooksMutex.Lock()
+	defer hooksMutex.Unlock()
 
-	script := strings.Join(commands, " && ")
-
-	var shell, flag string
-	if runtime.GOOS == "windows" {
-		shell = "cmd"
-		flag = "/C"
-	} else {
-		shell = "/bin/sh"
-		flag = "-c"
-	}
-	cmd := exec.Command(shell, flag, script)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-
-	var env []string
+	ltunnel := lua.LNil
 	if t != nil {
-		env = []string{
-			`XGROK_TUNNEL_URL=` + t.url,
-		}
-	} else {
-		env = []string{}
+		ltunnel = newLTunnel(LState, t)
 	}
 
-	env = append(os.Environ(), env...)
-	cmd.Env = env
+	err := LState.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    0,
+		Protect: true,
+	}, ltunnel)
 
-	return cmd.Run()
+	return err
 }

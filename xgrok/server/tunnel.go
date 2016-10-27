@@ -196,7 +196,7 @@ func (t *Tunnel) Shutdown() {
 	t.Info("Shutting down")
 
 	// hook
-	if err := runHookCommands(config.PreShutdownTunnel, t); err != nil {
+	if err := runTunnelHook(config.Hooks.PreShutdownTunnel, t); err != nil {
 		panic(err)
 	}
 
@@ -219,7 +219,7 @@ func (t *Tunnel) Shutdown() {
 	metrics.CloseTunnel(t)
 
 	// hook
-	if err := runHookCommands(config.PostShutdownTunnel, t); err != nil {
+	if err := runTunnelHook(config.Hooks.PostShutdownTunnel, t); err != nil {
 		panic(err)
 	}
 }

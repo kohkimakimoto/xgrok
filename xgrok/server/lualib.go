@@ -14,6 +14,8 @@ import (
 )
 
 func initLuaState(L *lua.LState) {
+	registerTunnelClass(L)
+
 	// modules
 	L.PreloadModule("json", gluajson.Loader)
 	L.PreloadModule("fs", gluafs.Loader)
@@ -28,7 +30,60 @@ func initLuaState(L *lua.LState) {
 	L.SetGlobal("server", lserver)
 	luserAuth := L.NewTable()
 	L.SetGlobal("user_auth", luserAuth)
+	lhooks := L.NewTable()
+	L.SetGlobal("hooks", lhooks)
 }
+
+
+const LTunnelClass = "Tunnel*"
+
+func registerTunnelClass(L *lua.LState) {
+	mt := L.NewTypeMetatable(LTunnelClass)
+	mt.RawSetString("__call", L.NewFunction(tunnelCall))
+	mt.RawSetString("__index", L.NewFunction(tunnelIndex))
+	mt.RawSetString("__newindex", L.NewFunction(tunnelNewindex))
+}
+
+
+func newLTunnel(L *lua.LState, tunnel *Tunnel) *lua.LUserData {
+	ud := L.NewUserData()
+	ud.Value = tunnel
+	L.SetMetatable(ud, L.GetTypeMetatable(LTunnelClass))
+	return ud
+}
+
+func checkTunnel(L *lua.LState) *Tunnel {
+	ud := L.CheckUserData(1)
+	if v, ok := ud.Value.(*Tunnel); ok {
+		return v
+	}
+	L.ArgError(1, "Tunnel object expected")
+	return nil
+}
+
+func tunnelCall(L *lua.LState) int {
+
+	return 0
+}
+
+func tunnelIndex(L *lua.LState) int {
+	tunnel := checkTunnel(L)
+	index := L.CheckString(2)
+
+	if index == "url" {
+		L.Push(lua.LString(tunnel.url))
+		return 1
+	}
+
+	L.Push(lua.LNil)
+	return 1
+}
+
+func tunnelNewindex(L *lua.LState) int {
+
+	return 0
+}
+
 
 func toLValue(L *lua.LState, value interface{}) lua.LValue {
 	switch converted := value.(type) {
