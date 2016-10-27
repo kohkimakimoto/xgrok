@@ -56,6 +56,12 @@ type AuthResp struct {
 	MmVersion string
 	ClientId  string
 	Error     string
+	CustomProps []CustomProp
+}
+
+type CustomProp struct {
+	Key string
+	Value string
 }
 
 // A client sends this message to the server over the control channel
@@ -87,6 +93,7 @@ type NewTunnel struct {
 	Url      string
 	Protocol string
 	Error    string
+	CustomProps []CustomProp
 }
 
 // When the server wants to initiate a new tunneled connection, it sends

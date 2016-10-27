@@ -31,6 +31,7 @@ type UserAuthConfiguration struct {
 type HooksConfiguration struct {
 	PreRegisterTunnel  *lua.LFunction
 	PostRegisterTunnel *lua.LFunction
+	AuthResponseFilter *lua.LFunction
 	PreShutdownTunnel  *lua.LFunction
 	PostShutdownTunnel *lua.LFunction
 }

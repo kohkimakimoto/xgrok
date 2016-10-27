@@ -11,10 +11,12 @@ import (
 	"github.com/yuin/gluare"
 	"github.com/yuin/gopher-lua"
 	"net/http"
+	"github.com/kohkimakimoto/xgrok/xgrok/msg"
 )
 
 func initLuaState(L *lua.LState) {
 	registerTunnelClass(L)
+	registerAuthRespClass(L)
 
 	// modules
 	L.PreloadModule("json", gluajson.Loader)
@@ -33,7 +35,6 @@ func initLuaState(L *lua.LState) {
 	lhooks := L.NewTable()
 	L.SetGlobal("hooks", lhooks)
 }
-
 
 const LTunnelClass = "Tunnel*"
 
@@ -84,6 +85,66 @@ func tunnelNewindex(L *lua.LState) int {
 	return 0
 }
 
+
+const LAuthRespClass = "AuthResp*"
+
+func registerAuthRespClass(L *lua.LState) {
+	mt := L.NewTypeMetatable(LAuthRespClass)
+	mt.RawSetString("__call", L.NewFunction(authRespCall))
+	mt.RawSetString("__index", L.NewFunction(authRespIndex))
+	mt.RawSetString("__newindex", L.NewFunction(authRespNewindex))
+}
+
+func newLAuthResp(L *lua.LState, authResp *msg.AuthResp) *lua.LUserData {
+	ud := L.NewUserData()
+	ud.Value = authResp
+	L.SetMetatable(ud, L.GetTypeMetatable(LAuthRespClass))
+	return ud
+}
+
+func checkAuthResp(L *lua.LState) *msg.AuthResp {
+	ud := L.CheckUserData(1)
+	if v, ok := ud.Value.(*msg.AuthResp); ok {
+		return v
+	}
+	L.ArgError(1, "AuthResp object expected")
+	return nil
+}
+
+func authRespCall(L *lua.LState) int {
+
+	return 0
+}
+
+func authRespIndex(L *lua.LState) int {
+	authResp := checkAuthResp(L)
+	index := L.CheckString(2)
+
+	if index == "append_props" {
+		L.Push(L.NewFunction(func(L *lua.LState) int {
+			key := L.CheckString(1)
+			value := L.CheckString(2)
+
+			prop := msg.CustomProp{
+				Key: key,
+				Value: value,
+			}
+
+			authResp.CustomProps = append(authResp.CustomProps, prop)
+			return 0
+		}))
+
+		return 1
+	}
+
+	L.Push(lua.LNil)
+	return 0
+}
+
+func authRespNewindex(L *lua.LState) int {
+
+	return 0
+}
 
 func toLValue(L *lua.LState, value interface{}) lua.LValue {
 	switch converted := value.(type) {

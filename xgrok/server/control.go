@@ -11,6 +11,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
+	log "github.com/kohkimakimoto/xgrok/xgrok/log"
 )
 
 const (
@@ -105,7 +106,7 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 	// authenticate user
 	if config.UserAuth.Enable {
 		if authMsg.User == "" {
-			failAuth(fmt.Errorf("Token is empty. Try to specify '--auth-token' option."))
+			failAuth(fmt.Errorf("Token is empty. Try to specify '--authtoken' option."))
 			return
 		}
 
@@ -124,11 +125,19 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 	go c.writer()
 
 	// Respond to authentication
-	c.out <- &msg.AuthResp{
+	authResp := &msg.AuthResp{
 		Version:   version.Proto,
 		MmVersion: version.MajorMinor(),
 		ClientId:  c.id,
+		CustomProps: []msg.CustomProp{},
 	}
+
+	if err := runHookFilterWithAuthResp(config.Hooks.AuthResponseFilter, authResp); err != nil {
+		log.Warn("error at auth_response_filter: %v", err)
+	}
+
+	// Respond to authentication
+	c.out <- authResp
 
 	// As a performance optimization, ask for a proxy connection up front
 	c.out <- &msg.ReqProxy{}
@@ -146,7 +155,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		tunnelReq.Protocol = proto
 
 		// hook
-		if err := runTunnelHook(config.Hooks.PreRegisterTunnel, nil); err != nil {
+		if err := runHookWithTunnel(config.Hooks.PreRegisterTunnel, nil); err != nil {
 			panic(err)
 		}
 
@@ -175,7 +184,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		rawTunnelReq.Hostname = strings.Replace(t.url, proto+"://", "", 1)
 
 		// hook
-		if err := runTunnelHook(config.Hooks.PostRegisterTunnel, t); err != nil {
+		if err := runHookWithTunnel(config.Hooks.PostRegisterTunnel, t); err != nil {
 			panic(err)
 		}
 	}
@@ -379,9 +388,10 @@ func (c *Control) Replaced(replacement *Control) {
 	c.shutdown.Begin()
 }
 
-func runTunnelHook(fn *lua.LFunction, t *Tunnel) error {
-	hooksMutex.Lock()
-	defer hooksMutex.Unlock()
+func runHookWithTunnel(fn *lua.LFunction, t *Tunnel) error {
+	if fn == nil {
+		return nil
+	}
 
 	ltunnel := lua.LNil
 	if t != nil {
@@ -396,3 +406,23 @@ func runTunnelHook(fn *lua.LFunction, t *Tunnel) error {
 
 	return err
 }
+
+func runHookFilterWithAuthResp(fn *lua.LFunction, authResp *msg.AuthResp) error {
+	if fn == nil {
+		return nil
+	}
+
+	lauthResp := lua.LNil
+	if authResp != nil {
+		lauthResp = newLAuthResp(LState, authResp)
+	}
+
+	err := LState.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    0,
+		Protect: true,
+	}, lauthResp)
+
+	return err
+}
+
