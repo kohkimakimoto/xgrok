@@ -7,12 +7,13 @@ import (
 	log "github.com/kohkimakimoto/xgrok/xgrok/log"
 	"github.com/kohkimakimoto/xgrok/xgrok/msg"
 	"github.com/kohkimakimoto/xgrok/xgrok/util"
+	"github.com/yuin/gopher-lua"
 	"math/rand"
 	"os"
-	"runtime/debug"
-	"time"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
+	"time"
 )
 
 const (
@@ -22,6 +23,7 @@ const (
 
 // GLOBALS
 var (
+	LState          *lua.LState
 	tunnelRegistry  *TunnelRegistry
 	controlRegistry *ControlRegistry
 
@@ -110,7 +112,7 @@ func waitHandlingSignals() {
 		syscall.SIGTERM,
 	)
 	for {
-		sig := <- sigChan
+		sig := <-sigChan
 		switch sig {
 		case syscall.SIGINT:
 			log.Info("Received SIGINT")
@@ -141,13 +143,20 @@ func wait() {
 func Main(opts *Options) {
 	log.LogTo(opts.Logto, opts.Loglevel)
 
+	// init lua state
+	LState = lua.NewState()
+	defer LState.Close()
+	initLuaState(LState)
+
 	// read configuration file
-	c, err := LoadConfiguration(opts)
+	c, err := LoadConfiguration(opts, LState)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	config = c
+
+	log.Debug("server config: %v", config)
 
 	// seed random number generator
 	seed, err := util.RandomSeed()

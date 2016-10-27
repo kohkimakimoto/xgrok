@@ -13,7 +13,7 @@ var ServeFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:  "http-addr",
-		Usage: "Public address for HTTP connections, empty string to disable",
+		Usage: "Public address for HTTP connections",
 	},
 	cli.StringFlag{
 		Name:  "https-addr",

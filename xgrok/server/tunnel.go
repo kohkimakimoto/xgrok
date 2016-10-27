@@ -106,7 +106,7 @@ func NewTunnel(m *msg.ReqTunnel, ctl *Control) (t *Tunnel, err error) {
 	proto := t.req.Protocol
 	switch proto {
 	case "tcp":
-		if config.DisableTCP {
+		if config.DisableTcp {
 			err = errors.New("TCP binding is not permitted by the server configuration")
 			return
 		}

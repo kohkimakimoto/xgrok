@@ -7,12 +7,12 @@ import (
 	"github.com/kohkimakimoto/xgrok/xgrok/util"
 	"github.com/kohkimakimoto/xgrok/xgrok/version"
 	"io"
-	"runtime/debug"
-	"strings"
-	"time"
 	"os"
 	"os/exec"
 	"runtime"
+	"runtime/debug"
+	"strings"
+	"time"
 )
 
 const (
@@ -105,13 +105,13 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 	}
 
 	// authenticate user
-	if config.UseAuth {
+	if config.UserAuth.Enable {
 		if authMsg.User == "" {
 			failAuth(fmt.Errorf("Token is empty. Try to specify '--auth-token' option."))
 			return
 		}
 
-		if _, ok := config.AuthtokensMap[authMsg.User]; !ok {
+		if _, ok := config.UserAuth.TokensMap[authMsg.User]; !ok {
 			failAuth(fmt.Errorf("Invalid token: %s", authMsg.User))
 			return
 		}
