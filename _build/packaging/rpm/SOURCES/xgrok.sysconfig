@@ -1,1 +1,1 @@
-OPTIONS="--config=/etc/xgrok/xgrok.yml"
+OPTIONS="--config=/etc/xgrok/xgrok.lua"

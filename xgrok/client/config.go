@@ -15,9 +15,9 @@ import (
 )
 
 type Configuration struct {
-	HttpProxy          string `yaml:"http_proxy,omitempty"`
-	ServerAddr         string `yaml:"server_addr,omitempty"`
-	InspectAddr        string `yaml:"inspect_addr,omitempty"`
+	HttpProxy   string `yaml:"http_proxy,omitempty"`
+	ServerAddr  string `yaml:"server_addr,omitempty"`
+	InspectAddr string `yaml:"inspect_addr,omitempty"`
 	// I implemented xgrok to be used for self hosting. It should not use embedded crt file as a original 'ngrok'.
 	// So it always uses host root cert.
 	// TrustHostRootCerts bool                            `yaml:"trust_host_root_certs,omitempty"`

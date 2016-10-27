@@ -9,7 +9,7 @@ Source0:        %{name}_linux_amd64.zip
 Source1:        %{name}.sysconfig
 Source2:        %{name}.service
 Source3:        %{name}.init
-Source4:        %{name}.config.yml
+Source4:        %{name}.config.lua
 Source5:        %{name}.logrotate
 BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -32,7 +32,7 @@ mkdir -p %{buildroot}/%{_sysconfdir}/sysconfig
 cp %{SOURCE1} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
 mkdir -p %{buildroot}/%{_sysconfdir}/logrotate.d/
 mkdir -p %{buildroot}/%{_sysconfdir}/%{name}
-cp %{SOURCE4} %{buildroot}/%{_sysconfdir}/%{name}/%{name}.yml
+cp %{SOURCE4} %{buildroot}/%{_sysconfdir}/%{name}/%{name}.lua
 cp %{SOURCE5} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 mkdir -p %{buildroot}/var/log/%{name}
 
@@ -77,7 +77,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%attr(644, root, root) %{_sysconfdir}/%{name}/%{name}.yml
+%attr(644, root, root) %{_sysconfdir}/%{name}/%{name}.lua
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %if 0%{?fedora} >= 14 || 0%{?rhel} >= 7
 %{_unitdir}/%{name}.service

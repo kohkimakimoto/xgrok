@@ -3,16 +3,15 @@ package server
 import (
 	"fmt"
 	"github.com/kohkimakimoto/xgrok/xgrok/conn"
+	log "github.com/kohkimakimoto/xgrok/xgrok/log"
 	"github.com/kohkimakimoto/xgrok/xgrok/msg"
 	"github.com/kohkimakimoto/xgrok/xgrok/util"
 	"github.com/kohkimakimoto/xgrok/xgrok/version"
+	"github.com/yuin/gopher-lua"
 	"io"
 	"runtime/debug"
 	"strings"
 	"time"
-	"os"
-	"os/exec"
-	"runtime"
 )
 
 const (
@@ -105,13 +104,13 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 	}
 
 	// authenticate user
-	if config.UseAuth {
+	if config.UserAuth.Enable {
 		if authMsg.User == "" {
-			failAuth(fmt.Errorf("Token is empty. Try to specify '--auth-token' option."))
+			failAuth(fmt.Errorf("Token is empty. Try to specify '--authtoken' option."))
 			return
 		}
 
-		if _, ok := config.AuthtokensMap[authMsg.User]; !ok {
+		if _, ok := config.UserAuth.TokensMap[authMsg.User]; !ok {
 			failAuth(fmt.Errorf("Invalid token: %s", authMsg.User))
 			return
 		}
@@ -126,11 +125,19 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 	go c.writer()
 
 	// Respond to authentication
-	c.out <- &msg.AuthResp{
-		Version:   version.Proto,
-		MmVersion: version.MajorMinor(),
-		ClientId:  c.id,
+	authResp := &msg.AuthResp{
+		Version:     version.Proto,
+		MmVersion:   version.MajorMinor(),
+		ClientId:    c.id,
+		CustomProps: []msg.CustomProp{},
 	}
+
+	if err := runHookFilterWithAuthResp(config.Hooks.AuthResponseFilter, authResp); err != nil {
+		log.Warn("error at auth_response_filter: %v", err)
+	}
+
+	// Respond to authentication
+	c.out <- authResp
 
 	// As a performance optimization, ask for a proxy connection up front
 	c.out <- &msg.ReqProxy{}
@@ -148,7 +155,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		tunnelReq.Protocol = proto
 
 		// hook
-		if err := runHookCommands(config.PreRegisterTunnel, nil); err != nil {
+		if err := runHookWithTunnel(config.Hooks.PreRegisterTunnel, nil); err != nil {
 			panic(err)
 		}
 
@@ -177,7 +184,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		rawTunnelReq.Hostname = strings.Replace(t.url, proto+"://", "", 1)
 
 		// hook
-		if err := runHookCommands(config.PostRegisterTunnel, t); err != nil {
+		if err := runHookWithTunnel(config.Hooks.PostRegisterTunnel, t); err != nil {
 			panic(err)
 		}
 	}
@@ -381,37 +388,40 @@ func (c *Control) Replaced(replacement *Control) {
 	c.shutdown.Begin()
 }
 
-func runHookCommands(commands []string, t *Tunnel) error {
-	if commands == nil || len(commands) == 0 {
+func runHookWithTunnel(fn *lua.LFunction, t *Tunnel) error {
+	if fn == nil {
 		return nil
 	}
 
-	script := strings.Join(commands, " && ")
-
-	var shell, flag string
-	if runtime.GOOS == "windows" {
-		shell = "cmd"
-		flag = "/C"
-	} else {
-		shell = "/bin/sh"
-		flag = "-c"
-	}
-	cmd := exec.Command(shell, flag, script)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-
-	var env []string
+	ltunnel := lua.LNil
 	if t != nil {
-		env = []string{
-			`XGROK_TUNNEL_URL=` + t.url,
-		}
-	} else {
-		env = []string{}
+		ltunnel = newLTunnel(LState, t)
 	}
 
-	env = append(os.Environ(), env...)
-	cmd.Env = env
+	err := LState.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    0,
+		Protect: true,
+	}, ltunnel)
 
-	return cmd.Run()
+	return err
+}
+
+func runHookFilterWithAuthResp(fn *lua.LFunction, authResp *msg.AuthResp) error {
+	if fn == nil {
+		return nil
+	}
+
+	lauthResp := lua.LNil
+	if authResp != nil {
+		lauthResp = newLAuthResp(LState, authResp)
+	}
+
+	err := LState.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    0,
+		Protect: true,
+	}, lauthResp)
+
+	return err
 }
