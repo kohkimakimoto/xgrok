@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/cjoudrey/gluahttp"
 	"github.com/kohkimakimoto/gluaenv"
 	"github.com/kohkimakimoto/gluafs"
@@ -17,6 +18,7 @@ import (
 func initLuaState(L *lua.LState) {
 	registerTunnelClass(L)
 	registerAuthRespClass(L)
+	registerNewTunnelClass(L)
 
 	// modules
 	L.PreloadModule("json", gluajson.Loader)
@@ -115,27 +117,7 @@ func authRespCall(L *lua.LState) int {
 }
 
 func authRespIndex(L *lua.LState) int {
-	authResp := checkAuthResp(L)
-	index := L.CheckString(2)
 
-	if index == "append_props" {
-		L.Push(L.NewFunction(func(L *lua.LState) int {
-			key := L.CheckString(1)
-			value := L.CheckString(2)
-
-			prop := msg.CustomProp{
-				Key:   key,
-				Value: value,
-			}
-
-			authResp.CustomProps = append(authResp.CustomProps, prop)
-			return 0
-		}))
-
-		return 1
-	}
-
-	L.Push(lua.LNil)
 	return 0
 }
 
@@ -166,4 +148,130 @@ func toLValue(L *lua.LState, value interface{}) lua.LValue {
 		return tbl
 	}
 	return lua.LNil
+}
+
+// This code inspired by https://github.com/yuin/gluamapper/blob/master/gluamapper.go
+func toGoValue(lv lua.LValue) interface{} {
+	switch v := lv.(type) {
+	case *lua.LNilType:
+		return nil
+	case lua.LBool:
+		return bool(v)
+	case lua.LString:
+		return string(v)
+	case lua.LNumber:
+		return float64(v)
+	case *lua.LTable:
+		maxn := v.MaxN()
+		if maxn == 0 { // table
+			ret := make(map[string]interface{})
+			v.ForEach(func(key, value lua.LValue) {
+				keystr := fmt.Sprint(toGoValue(key))
+				ret[keystr] = toGoValue(value)
+			})
+			return ret
+		} else { // array
+			ret := make([]interface{}, 0, maxn)
+			for i := 1; i <= maxn; i++ {
+				ret = append(ret, toGoValue(v.RawGetInt(i)))
+			}
+			return ret
+		}
+	default:
+		return v
+	}
+}
+
+////////////////
+
+const LNewTunnelClass = "NewTunnel*"
+
+func registerNewTunnelClass(L *lua.LState) {
+	mt := L.NewTypeMetatable(LNewTunnelClass)
+	mt.RawSetString("__call", L.NewFunction(newTunnelCall))
+	mt.RawSetString("__index", L.NewFunction(newTunnelIndex))
+	mt.RawSetString("__newindex", L.NewFunction(newTunnelNewindex))
+}
+
+func newLNewTunnel(L *lua.LState, newTunnel *msg.NewTunnel) *lua.LUserData {
+	ud := L.NewUserData()
+	ud.Value = newTunnel
+	L.SetMetatable(ud, L.GetTypeMetatable(LNewTunnelClass))
+	return ud
+}
+
+func checkNewTunnel(L *lua.LState) *msg.NewTunnel {
+	ud := L.CheckUserData(1)
+	if v, ok := ud.Value.(*msg.NewTunnel); ok {
+		return v
+	}
+	L.ArgError(1, "NewTunnel object expected")
+	return nil
+}
+
+func newTunnelCall(L *lua.LState) int {
+
+	return 0
+}
+
+func newTunnelIndex(L *lua.LState) int {
+	newTunnel := checkNewTunnel(L)
+	index := L.CheckString(2)
+
+	switch index {
+	case "url":
+		L.Push(lua.LString(newTunnel.Url))
+		return 1
+	case "proto":
+		L.Push(lua.LString(newTunnel.Protocol))
+		return 1
+	case "req_id":
+		L.Push(lua.LString(newTunnel.ReqId))
+		return 1
+	case "custom_props":
+		L.Push(toLValue(L, newTunnel.CustomProps))
+		return 1
+
+	}
+
+	L.Push(lua.LNil)
+	return 1
+}
+
+func newTunnelNewindex(L *lua.LState) int {
+	newTunnel := checkNewTunnel(L)
+	index := L.CheckString(2)
+
+	switch index {
+	case "url":
+		newTunnel.Url = L.CheckString(3)
+		return 0
+	case "proto":
+		newTunnel.Protocol = L.CheckString(3)
+		return 0
+	case "req_id":
+		newTunnel.ReqId = L.CheckString(3)
+		return 1
+	case "custom_props":
+		tb := L.CheckTable(3)
+		tb.ForEach(func(k, v lua.LValue) {
+			kvpair := v.(*lua.LTable)
+			if kvpair != nil {
+				kvpair.ForEach(func(key, value lua.LValue) {
+					keystr := fmt.Sprint(toGoValue(key))
+					valuestr := fmt.Sprint(toGoValue(value))
+
+					newTunnel.CustomProps = append(newTunnel.CustomProps, msg.CustomProp{
+						Key:   keystr,
+						Value: valuestr,
+					})
+				})
+			}
+
+		})
+		//
+		return 1
+	}
+
+	return 0
 }

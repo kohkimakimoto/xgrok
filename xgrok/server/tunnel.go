@@ -165,6 +165,11 @@ func NewTunnel(m *msg.ReqTunnel, ctl *Control) (t *Tunnel, err error) {
 		return
 
 	case "http", "https":
+		if config.DisableHostname && t.req.Hostname != "" {
+			err = errors.New("Using custom hostname is not permitted by the server configuration")
+			return
+		}
+
 		l, ok := listeners[proto]
 		if !ok {
 			err = fmt.Errorf("Not listening for %s connections", proto)

@@ -52,11 +52,10 @@ type Auth struct {
 // that is used to associate and authenticate future
 // proxy connections via the same field in RegProxy messages.
 type AuthResp struct {
-	Version     string
-	MmVersion   string
-	ClientId    string
-	Error       string
-	CustomProps []CustomProp
+	Version   string
+	MmVersion string
+	ClientId  string
+	Error     string
 }
 
 type CustomProp struct {

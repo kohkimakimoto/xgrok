@@ -23,6 +23,8 @@ server.domain = "xgrok-example.com"
 -- server.disable_tcp is to disable TCP protocol proxy.
 server.disable_tcp = true
 
+-- server.disable_hostname is to disable using custom hostname proxy.
+server.disable_hostname = false
 
 -- #####################################################################
 -- user_auth is a table that contains user auth configurations.
@@ -42,7 +44,14 @@ user_auth.tokens = {
 -- hooks.pre_register_tunnel = function()
 --
 -- end
---
+
+-- hooks.pre_output_new_tunnel = function(newTunnel)
+--     newTunnel.custom_props = {
+--         { key = "value" },
+--         { foo = "bar" },
+--     }
+-- end
+
 -- hooks.post_register_tunnel = function(tunnel)
 --     print("register_tunnel: " .. tunnel.url)
 -- end

@@ -106,6 +106,13 @@ func (v *TermView) draw() {
 	for _, t := range state.GetTunnels() {
 		v.Printf(0, i, "%-30s%s -> %s", "Forwarding", t.PublicUrl, t.LocalAddr)
 		i++
+
+		if t.CustomProps != nil && len(t.CustomProps) > 0 {
+			for _, prop := range t.CustomProps {
+				v.Printf(0, i, "%-30s%s", prop.Key, prop.Value)
+				i++
+			}
+		}
 	}
 
 	v.Printf(0, i+0, "%-30s%s", "Web Interface", v.ctl.GetWebInspectAddr())

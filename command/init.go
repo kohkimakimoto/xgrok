@@ -31,7 +31,6 @@ func initAction(ctx *cli.Context) error {
 }
 
 var configContent = `server_addr:           "` + xgrok.DefaultServerAddr + `"
-inspect_addr:          "` + xgrok.DefaultInspectAddr + `"
 insecure_skip_verify:  true
 tunnels:
   foo:

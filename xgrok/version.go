@@ -11,5 +11,6 @@ var (
 	DefaultTunnelAddr  = "0.0.0.0:9690"
 	DefaultHttpAddr    = "0.0.0.0:9680"
 	DefaultServerAddr  = "127.0.0.1" + DefaultTunnelAddr
-	DefaultInspectAddr = "127.0.0.1:4040"
+	DefaultInspectAddr = "disabled"
+	// DefaultInspectAddr = "127.0.0.1:4040"
 )

@@ -8,15 +8,16 @@ import (
 )
 
 type Configuration struct {
-	TunnelAddr string
-	HttpAddr   string
-	HttpsAddr  string
-	Domain     string
-	TlsCrt     string
-	TlsKey     string
-	DisableTcp bool
-	Logto      string `gluamapper:"-"`
-	Loglevel   string `gluamapper:"-"`
+	TunnelAddr      string
+	HttpAddr        string
+	HttpsAddr       string
+	Domain          string
+	TlsCrt          string
+	TlsKey          string
+	DisableTcp      bool
+	DisableHostname bool
+	Logto           string `gluamapper:"-"`
+	Loglevel        string `gluamapper:"-"`
 
 	UserAuth UserAuthConfiguration `gluamapper:"-"`
 	Hooks    HooksConfiguration    `gluamapper:"-"`
@@ -30,6 +31,7 @@ type UserAuthConfiguration struct {
 
 type HooksConfiguration struct {
 	PreRegisterTunnel  *lua.LFunction
+	PreOutputNewTunnel *lua.LFunction
 	PostRegisterTunnel *lua.LFunction
 	AuthResponseFilter *lua.LFunction
 	PreShutdownTunnel  *lua.LFunction

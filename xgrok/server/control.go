@@ -126,10 +126,9 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 
 	// Respond to authentication
 	authResp := &msg.AuthResp{
-		Version:     version.Proto,
-		MmVersion:   version.MajorMinor(),
-		ClientId:    c.id,
-		CustomProps: []msg.CustomProp{},
+		Version:   version.Proto,
+		MmVersion: version.MajorMinor(),
+		ClientId:  c.id,
 	}
 
 	if err := runHookFilterWithAuthResp(config.Hooks.AuthResponseFilter, authResp); err != nil {
@@ -174,12 +173,18 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		// add it to the list of tunnels
 		c.tunnels = append(c.tunnels, t)
 
-		// acknowledge success
-		c.out <- &msg.NewTunnel{
-			Url:      t.url,
-			Protocol: proto,
-			ReqId:    rawTunnelReq.ReqId,
+		msgNewTunnel := &msg.NewTunnel{
+			Url:         t.url,
+			Protocol:    proto,
+			ReqId:       rawTunnelReq.ReqId,
+			CustomProps: []msg.CustomProp{},
 		}
+		if err = runHookWithNewTunnel(config.Hooks.PreOutputNewTunnel, msgNewTunnel); err != nil {
+			panic(err)
+		}
+
+		// acknowledge success
+		c.out <- msgNewTunnel
 
 		rawTunnelReq.Hostname = strings.Replace(t.url, proto+"://", "", 1)
 
@@ -386,6 +391,25 @@ func (c *Control) Replaced(replacement *Control) {
 
 	// tell the old one to shutdown
 	c.shutdown.Begin()
+}
+
+func runHookWithNewTunnel(fn *lua.LFunction, newTunnel *msg.NewTunnel) error {
+	if fn == nil {
+		return nil
+	}
+
+	lnewTunnel := lua.LNil
+	if newTunnel != nil {
+		lnewTunnel = newLNewTunnel(LState, newTunnel)
+	}
+
+	err := LState.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    0,
+		Protect: true,
+	}, lnewTunnel)
+
+	return err
 }
 
 func runHookWithTunnel(fn *lua.LFunction, t *Tunnel) error {

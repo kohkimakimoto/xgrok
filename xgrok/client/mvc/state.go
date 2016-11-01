@@ -1,6 +1,7 @@
 package mvc
 
 import (
+	"github.com/kohkimakimoto/xgrok/xgrok/msg"
 	"github.com/kohkimakimoto/xgrok/xgrok/proto"
 	metrics "github.com/rcrowley/go-metrics"
 )
@@ -23,9 +24,10 @@ const (
 )
 
 type Tunnel struct {
-	PublicUrl string
-	Protocol  proto.Protocol
-	LocalAddr string
+	PublicUrl   string
+	Protocol    proto.Protocol
+	LocalAddr   string
+	CustomProps []msg.CustomProp
 }
 
 type ConnectionContext struct {
