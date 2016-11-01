@@ -329,7 +329,8 @@ func (c *ClientModel) control() {
 			}
 
 			tunnel := mvc.Tunnel{
-				PublicUrl:   m.Url,
+				// PublicUrl:   m.Url,
+				PublicUrl:   m.PublicUrl,
 				LocalAddr:   reqIdToTunnelConfig[m.ReqId].Protocols[m.Protocol],
 				Protocol:    c.protoMap[m.Protocol],
 				CustomProps: m.CustomProps,

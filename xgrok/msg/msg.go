@@ -90,6 +90,7 @@ type ReqTunnel struct {
 type NewTunnel struct {
 	ReqId       string
 	Url         string
+	PublicUrl   string
 	Protocol    string
 	Error       string
 	CustomProps []CustomProp

@@ -175,6 +175,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 
 		msgNewTunnel := &msg.NewTunnel{
 			Url:         t.url,
+			PublicUrl:   t.url,
 			Protocol:    proto,
 			ReqId:       rawTunnelReq.ReqId,
 			CustomProps: []msg.CustomProp{},

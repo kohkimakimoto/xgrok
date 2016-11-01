@@ -222,6 +222,9 @@ func newTunnelIndex(L *lua.LState) int {
 	case "url":
 		L.Push(lua.LString(newTunnel.Url))
 		return 1
+	case "public_url":
+		L.Push(lua.LString(newTunnel.PublicUrl))
+		return 1
 	case "proto":
 		L.Push(lua.LString(newTunnel.Protocol))
 		return 1
@@ -229,9 +232,8 @@ func newTunnelIndex(L *lua.LState) int {
 		L.Push(lua.LString(newTunnel.ReqId))
 		return 1
 	case "custom_props":
-		L.Push(toLValue(L, newTunnel.CustomProps))
-		return 1
-
+		// TODO
+		return 0
 	}
 
 	L.Push(lua.LNil)
@@ -246,6 +248,11 @@ func newTunnelNewindex(L *lua.LState) int {
 	case "url":
 		newTunnel.Url = L.CheckString(3)
 		return 0
+
+	case "public_url":
+		newTunnel.PublicUrl = L.CheckString(3)
+		return 0
+
 	case "proto":
 		newTunnel.Protocol = L.CheckString(3)
 		return 0
