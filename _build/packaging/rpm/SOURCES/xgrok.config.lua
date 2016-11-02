@@ -16,7 +16,7 @@ server.http_addr = "0.0.0.0:9680"
 server.https_addr = ""
 
 -- server.domain is a domain where the tunnels are hosted
-server.domain = "replace_your_domain.com"
+server.domain = "your_xgrok_domain.com"
 
 -- server.tls_crt Path to a TLS certificate file
 -- ex) server.tls_crt = "/etc/xgrok/tls/crt"
