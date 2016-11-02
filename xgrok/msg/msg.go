@@ -2,8 +2,8 @@ package msg
 
 import (
 	"encoding/json"
-	"reflect"
 	"github.com/yuin/gopher-lua"
+	"reflect"
 )
 
 var TypeMap map[string]reflect.Type
@@ -89,12 +89,12 @@ type ReqTunnel struct {
 // ReqTunnel. (ex. A client opens an https tunnel and the server
 // chooses to open an http tunnel of the same name as well)
 type NewTunnel struct {
-	ReqId       string
-	Url         string
-	PublicUrl   string
-	Protocol    string
-	Error       string
-	CustomProps []CustomProp
+	ReqId        string
+	Url          string
+	PublicUrl    string
+	Protocol     string
+	Error        string
+	CustomProps  []CustomProp
 	LCustomProps *lua.LTable `json:"-"`
 }
 
