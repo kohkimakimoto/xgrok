@@ -115,6 +115,11 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 		}
 	}
 
+	if err := runHookFilterWithMsgAuth(config.Hooks.MsgAuthFilter, authMsg); err != nil {
+		failAuth(err)
+		return
+	}
+
 	// register the control
 	if replaced := controlRegistry.Add(c.id, c); replaced != nil {
 		replaced.shutdown.WaitComplete()
@@ -130,7 +135,7 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 		ClientId:  c.id,
 	}
 
-	if err := runHookFilterWithMsgAuthResp(config.Hooks.MsgAuthResponseFilter, authResp); err != nil {
+	if err := runHookFilterWithMsgAuthResp(config.Hooks.MsgAuthRespFilter, authResp); err != nil {
 		failAuth(err)
 		return
 	}
@@ -154,7 +159,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		tunnelReq.Protocol = proto
 
 		// hook
-		if err := runHookWithTunnel(config.Hooks.PreRegisterTunnel, nil); err != nil {
+		if err := runHookWithMsgReqTunnel(config.Hooks.MsgReqTunnelFilter, &tunnelReq); err != nil {
 			c.out <- &msg.NewTunnel{Error: err.Error()}
 			if len(c.tunnels) == 0 {
 				c.shutdown.Begin()
@@ -422,13 +427,14 @@ func runHookWithMsgNewTunnel(fn *lua.LFunction, newTunnel *msg.NewTunnel) error 
 	if fn == nil {
 		return nil
 	}
+	L := LState.NewThread()
 
 	lnewTunnel := lua.LNil
 	if newTunnel != nil {
-		lnewTunnel = newLMsgNewTunnel(LState, newTunnel)
+		lnewTunnel = newLMsgNewTunnel(L, newTunnel)
 	}
 
-	err := LState.CallByParam(lua.P{
+	err := L.CallByParam(lua.P{
 		Fn:      fn,
 		NRet:    1,
 		Protect: true,
@@ -438,8 +444,41 @@ func runHookWithMsgNewTunnel(fn *lua.LFunction, newTunnel *msg.NewTunnel) error 
 		return err
 	}
 
-	ret := LState.Get(-1) // returned value
-	LState.Pop(1)
+	ret := L.Get(-1) // returned value
+	L.Pop(1)
+
+	if ret == lua.LNil {
+		return nil
+	} else {
+		return fmt.Errorf("%s", ret.String())
+	}
+
+	return nil
+}
+
+func runHookWithMsgReqTunnel(fn *lua.LFunction, msgReqTunnel *msg.ReqTunnel) error {
+	if fn == nil {
+		return nil
+	}
+	L := LState.NewThread()
+
+	lmsgReqTunnel := lua.LNil
+	if msgReqTunnel != nil {
+		lmsgReqTunnel = newLMsgReqTunnel(L, msgReqTunnel)
+	}
+
+	err := L.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    1,
+		Protect: true,
+	}, lmsgReqTunnel)
+
+	if err != nil {
+		return err
+	}
+
+	ret := L.Get(-1) // returned value
+	L.Pop(1)
 
 	if ret == lua.LNil {
 		return nil
@@ -454,13 +493,14 @@ func runHookWithTunnel(fn *lua.LFunction, t *Tunnel) error {
 	if fn == nil {
 		return nil
 	}
+	L := LState.NewThread()
 
 	ltunnel := lua.LNil
 	if t != nil {
-		ltunnel = newLTunnel(LState, t)
+		ltunnel = newLTunnel(L, t)
 	}
 
-	err := LState.CallByParam(lua.P{
+	err := L.CallByParam(lua.P{
 		Fn:      fn,
 		NRet:    1,
 		Protect: true,
@@ -470,8 +510,41 @@ func runHookWithTunnel(fn *lua.LFunction, t *Tunnel) error {
 		return err
 	}
 
-	ret := LState.Get(-1) // returned value
-	LState.Pop(1)
+	ret := L.Get(-1) // returned value
+	L.Pop(1)
+
+	if ret == lua.LNil {
+		return nil
+	} else {
+		return fmt.Errorf("%s", ret.String())
+	}
+
+	return nil
+}
+
+func runHookFilterWithMsgAuth(fn *lua.LFunction, msgAuth *msg.Auth) error {
+	if fn == nil {
+		return nil
+	}
+	L := LState.NewThread()
+
+	lauth := lua.LNil
+	if msgAuth != nil {
+		lauth = newLMsgAuth(L, msgAuth)
+	}
+
+	err := L.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    1,
+		Protect: true,
+	}, lauth)
+
+	if err != nil {
+		return err
+	}
+
+	ret := L.Get(-1) // returned value
+	L.Pop(1)
 
 	if ret == lua.LNil {
 		return nil
@@ -486,13 +559,14 @@ func runHookFilterWithMsgAuthResp(fn *lua.LFunction, msgAuthResp *msg.AuthResp) 
 	if fn == nil {
 		return nil
 	}
+	L := LState.NewThread()
 
 	lauthResp := lua.LNil
 	if msgAuthResp != nil {
-		lauthResp = newLAuthResp(LState, msgAuthResp)
+		lauthResp = newLMsgAuthResp(L, msgAuthResp)
 	}
 
-	err := LState.CallByParam(lua.P{
+	err := L.CallByParam(lua.P{
 		Fn:      fn,
 		NRet:    1,
 		Protect: true,
@@ -502,8 +576,8 @@ func runHookFilterWithMsgAuthResp(fn *lua.LFunction, msgAuthResp *msg.AuthResp) 
 		return err
 	}
 
-	ret := LState.Get(-1) // returned value
-	LState.Pop(1)
+	ret := L.Get(-1) // returned value
+	L.Pop(1)
 
 	if ret == lua.LNil {
 		return nil

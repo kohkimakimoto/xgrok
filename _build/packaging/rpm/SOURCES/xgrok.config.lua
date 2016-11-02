@@ -5,6 +5,8 @@
 -- server.tunnel_addr is a listening address to accept client tunnel request.
 server.tunnel_addr = "0.0.0.0:9690"
 
+server.status_addr = "0.0.0.0:9691"
+
 -- server.https_addr is a public address for HTTP connections
 server.http_addr = "0.0.0.0:9680"
 
@@ -52,11 +54,15 @@ user_auth.tokens = {
 --   In all hook functions, You can return value that represents a error.
 --
 
--- hooks.msg_auth_response_filter = function(msg_auth_resp)
+-- hooks.msg_auth_filter = function(msg_auth)
 --
 -- end
 
--- hooks.pre_register_tunnel = function()
+-- hooks.msg_auth_resp_filter = function(msg_auth_resp)
+--
+-- end
+
+-- hooks.msg_req_tunnel_filter = function(msg_req_tunnel)
 --
 -- end
 

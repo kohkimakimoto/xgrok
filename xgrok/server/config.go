@@ -11,6 +11,7 @@ type Configuration struct {
 	TunnelAddr      string
 	HttpAddr        string
 	HttpsAddr       string
+	StatusAddr      string
 	Domain          string
 	TlsCrt          string
 	TlsKey          string
@@ -30,12 +31,13 @@ type UserAuthConfiguration struct {
 }
 
 type HooksConfiguration struct {
-	MsgAuthResponseFilter *lua.LFunction
-	PreRegisterTunnel     *lua.LFunction
-	MsgNewTunnelFilter    *lua.LFunction
-	PostRegisterTunnel    *lua.LFunction
-	PreShutdownTunnel     *lua.LFunction
-	PostShutdownTunnel    *lua.LFunction
+	MsgAuthFilter      *lua.LFunction
+	MsgAuthRespFilter  *lua.LFunction
+	MsgReqTunnelFilter *lua.LFunction
+	MsgNewTunnelFilter *lua.LFunction
+	PostRegisterTunnel *lua.LFunction
+	PreShutdownTunnel  *lua.LFunction
+	PostShutdownTunnel *lua.LFunction
 }
 
 func LoadConfiguration(opts *Options, L *lua.LState) (*Configuration, error) {
