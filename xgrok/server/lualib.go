@@ -18,7 +18,7 @@ import (
 func initLuaState(L *lua.LState) {
 	registerTunnelClass(L)
 	registerAuthRespClass(L)
-	registerNewTunnelClass(L)
+	registerMsgNewTunnelClass(L)
 
 	// modules
 	L.PreloadModule("json", gluajson.Loader)
@@ -86,42 +86,42 @@ func tunnelNewindex(L *lua.LState) int {
 	return 0
 }
 
-const LAuthRespClass = "AuthResp*"
+const LMsgAuthRespClass = "MsgAuthResp*"
 
 func registerAuthRespClass(L *lua.LState) {
-	mt := L.NewTypeMetatable(LAuthRespClass)
-	mt.RawSetString("__call", L.NewFunction(authRespCall))
-	mt.RawSetString("__index", L.NewFunction(authRespIndex))
-	mt.RawSetString("__newindex", L.NewFunction(authRespNewindex))
+	mt := L.NewTypeMetatable(LMsgAuthRespClass)
+	mt.RawSetString("__call", L.NewFunction(msgAuthRespCall))
+	mt.RawSetString("__index", L.NewFunction(msgAuthRespIndex))
+	mt.RawSetString("__newindex", L.NewFunction(msgAuthRespNewindex))
 }
 
 func newLAuthResp(L *lua.LState, authResp *msg.AuthResp) *lua.LUserData {
 	ud := L.NewUserData()
 	ud.Value = authResp
-	L.SetMetatable(ud, L.GetTypeMetatable(LAuthRespClass))
+	L.SetMetatable(ud, L.GetTypeMetatable(LMsgAuthRespClass))
 	return ud
 }
 
-func checkAuthResp(L *lua.LState) *msg.AuthResp {
+func checkMsgAuthResp(L *lua.LState) *msg.AuthResp {
 	ud := L.CheckUserData(1)
 	if v, ok := ud.Value.(*msg.AuthResp); ok {
 		return v
 	}
-	L.ArgError(1, "AuthResp object expected")
+	L.ArgError(1, "MsgAuthResp object expected")
 	return nil
 }
 
-func authRespCall(L *lua.LState) int {
+func msgAuthRespCall(L *lua.LState) int {
 
 	return 0
 }
 
-func authRespIndex(L *lua.LState) int {
+func msgAuthRespIndex(L *lua.LState) int {
 
 	return 0
 }
 
-func authRespNewindex(L *lua.LState) int {
+func msgAuthRespNewindex(L *lua.LState) int {
 
 	return 0
 }
@@ -184,38 +184,38 @@ func toGoValue(lv lua.LValue) interface{} {
 
 ////////////////
 
-const LNewTunnelClass = "NewTunnel*"
+const LMsgNewTunnelClass = "MsgNewTunnel*"
 
-func registerNewTunnelClass(L *lua.LState) {
-	mt := L.NewTypeMetatable(LNewTunnelClass)
-	mt.RawSetString("__call", L.NewFunction(newTunnelCall))
-	mt.RawSetString("__index", L.NewFunction(newTunnelIndex))
-	mt.RawSetString("__newindex", L.NewFunction(newTunnelNewindex))
+func registerMsgNewTunnelClass(L *lua.LState) {
+	mt := L.NewTypeMetatable(LMsgNewTunnelClass)
+	mt.RawSetString("__call", L.NewFunction(msgNewTunnelCall))
+	mt.RawSetString("__index", L.NewFunction(msgNewTunnelIndex))
+	mt.RawSetString("__newindex", L.NewFunction(msgNewTunnelNewindex))
 }
 
-func newLNewTunnel(L *lua.LState, newTunnel *msg.NewTunnel) *lua.LUserData {
+func newLMsgNewTunnel(L *lua.LState, newTunnel *msg.NewTunnel) *lua.LUserData {
 	ud := L.NewUserData()
 	ud.Value = newTunnel
-	L.SetMetatable(ud, L.GetTypeMetatable(LNewTunnelClass))
+	L.SetMetatable(ud, L.GetTypeMetatable(LMsgNewTunnelClass))
 	return ud
 }
 
-func checkNewTunnel(L *lua.LState) *msg.NewTunnel {
+func checkMsgNewTunnel(L *lua.LState) *msg.NewTunnel {
 	ud := L.CheckUserData(1)
 	if v, ok := ud.Value.(*msg.NewTunnel); ok {
 		return v
 	}
-	L.ArgError(1, "NewTunnel object expected")
+	L.ArgError(1, "MsgNewTunnel object expected")
 	return nil
 }
 
-func newTunnelCall(L *lua.LState) int {
+func msgNewTunnelCall(L *lua.LState) int {
 
 	return 0
 }
 
-func newTunnelIndex(L *lua.LState) int {
-	newTunnel := checkNewTunnel(L)
+func msgNewTunnelIndex(L *lua.LState) int {
+	newTunnel := checkMsgNewTunnel(L)
 	index := L.CheckString(2)
 
 	switch index {
@@ -232,16 +232,16 @@ func newTunnelIndex(L *lua.LState) int {
 		L.Push(lua.LString(newTunnel.ReqId))
 		return 1
 	case "custom_props":
-		// TODO
-		return 0
+		L.Push(newTunnel.LCustomProps)
+		return 1
 	}
 
 	L.Push(lua.LNil)
 	return 1
 }
 
-func newTunnelNewindex(L *lua.LState) int {
-	newTunnel := checkNewTunnel(L)
+func msgNewTunnelNewindex(L *lua.LState) int {
+	newTunnel := checkMsgNewTunnel(L)
 	index := L.CheckString(2)
 
 	switch index {
@@ -260,7 +260,10 @@ func newTunnelNewindex(L *lua.LState) int {
 		newTunnel.ReqId = L.CheckString(3)
 		return 1
 	case "custom_props":
-		tb := L.CheckTable(3)
+		newTunnel.LCustomProps = L.CheckTable(3)
+
+		// parse to go value
+		tb := newTunnel.LCustomProps
 		tb.ForEach(func(k, v lua.LValue) {
 			kvpair := v.(*lua.LTable)
 			if kvpair != nil {

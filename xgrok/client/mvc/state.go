@@ -24,10 +24,11 @@ const (
 )
 
 type Tunnel struct {
-	PublicUrl   string
-	Protocol    proto.Protocol
-	LocalAddr   string
-	CustomProps []msg.CustomProp
+	PublicUrl     string
+	DispPublicUrl string
+	Protocol      proto.Protocol
+	LocalAddr     string
+	CustomProps   []msg.CustomProp
 }
 
 type ConnectionContext struct {

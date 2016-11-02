@@ -104,7 +104,7 @@ func (v *TermView) draw() {
 	v.Printf(0, 3, "%-30s%s/%s", "Version", state.GetClientVersion(), state.GetServerVersion())
 	var i int = 4
 	for _, t := range state.GetTunnels() {
-		v.Printf(0, i, "%-30s%s -> %s", "Forwarding", t.PublicUrl, t.LocalAddr)
+		v.Printf(0, i, "%-30s%s -> %s", "Forwarding", t.DispPublicUrl, t.LocalAddr)
 		i++
 
 		if t.CustomProps != nil && len(t.CustomProps) > 0 {

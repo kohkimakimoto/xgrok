@@ -30,12 +30,12 @@ type UserAuthConfiguration struct {
 }
 
 type HooksConfiguration struct {
-	PreRegisterTunnel  *lua.LFunction
-	PreOutputNewTunnel *lua.LFunction
-	PostRegisterTunnel *lua.LFunction
-	AuthResponseFilter *lua.LFunction
-	PreShutdownTunnel  *lua.LFunction
-	PostShutdownTunnel *lua.LFunction
+	MsgAuthResponseFilter *lua.LFunction
+	PreRegisterTunnel     *lua.LFunction
+	MsgNewTunnelFilter    *lua.LFunction
+	PostRegisterTunnel    *lua.LFunction
+	PreShutdownTunnel     *lua.LFunction
+	PostShutdownTunnel    *lua.LFunction
 }
 
 func LoadConfiguration(opts *Options, L *lua.LState) (*Configuration, error) {

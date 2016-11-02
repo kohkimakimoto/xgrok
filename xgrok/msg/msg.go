@@ -3,6 +3,7 @@ package msg
 import (
 	"encoding/json"
 	"reflect"
+	"github.com/yuin/gopher-lua"
 )
 
 var TypeMap map[string]reflect.Type
@@ -94,6 +95,7 @@ type NewTunnel struct {
 	Protocol    string
 	Error       string
 	CustomProps []CustomProp
+	LCustomProps *lua.LTable `json:"-"`
 }
 
 // When the server wants to initiate a new tunneled connection, it sends
