@@ -2,9 +2,10 @@
 -- server.server is a table that contains server configurations.
 -- #####################################################################
 
--- server.tunnel_addr is a listening address to accept client tunnel request.
+-- server.tunnel_addr is a listening address to accept client tunnel requests.
 server.tunnel_addr = "0.0.0.0:9690"
 
+-- server.status_addr is a listening address to provide status API.
 server.status_addr = "0.0.0.0:9691"
 
 -- server.https_addr is a public address for HTTP connections
