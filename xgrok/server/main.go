@@ -12,7 +12,6 @@ import (
 	"os"
 	"os/signal"
 	"runtime/debug"
-	"sync"
 	"syscall"
 	"time"
 )
@@ -148,7 +147,7 @@ func Main(opts *Options) {
 	LState = lua.NewState()
 	defer LState.Close()
 	initLuaState(LState)
-	
+
 	// read configuration file
 	c, err := LoadConfiguration(opts, LState)
 	if err != nil {
